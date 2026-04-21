@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901335309262",
+    "project_id": "elamais-ab830",
+    "storage_bucket": "elamais-ab830.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901335309262:android:b1d38d1e595f5495df699f",
+        "android_client_info": {
+          "package_name": "com.example.ela"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtIFF-to3tXgk8vqCTtppZi5sShfBKsno"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
