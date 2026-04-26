@@ -9,7 +9,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.ela.domain.model.Preferences
 import com.example.ela.notification.worker.NotificationWorker
-import kotlinx.coroutines.flow.Flow
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -42,7 +41,7 @@ class NotificationScheduler(private val context: Context) {
         dateId: Long,
         title: String,
         dateMillis: Long,
-        preferences: Flow<Preferences>
+        preferences: Preferences
     ) {
         val baseDate = Instant.ofEpochMilli(dateMillis)
             .atZone(ZoneId.systemDefault())

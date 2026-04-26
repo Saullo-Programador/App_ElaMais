@@ -10,5 +10,8 @@ data class PreferencesEntity(
     val favoriteFoods: String, // JSON
     val favoriteSweets: String,
     val dislikedThings: String,
-    val symptoms: String
+    val symptoms: String,
+    val notificationsEnabled: Boolean = true,
+    val notificationsTime: String = "08:00",
+    val timesPerDay: Int = 1
 )

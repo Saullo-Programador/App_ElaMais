@@ -1,5 +1,7 @@
 package com.example.ela.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.ImportantDate
@@ -31,6 +33,7 @@ class ImportantDateViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun save(date: ImportantDate) {
         viewModelScope.launch {
             saveImportantDateUseCase(date)

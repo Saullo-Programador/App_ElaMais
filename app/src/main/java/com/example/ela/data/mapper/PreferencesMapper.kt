@@ -14,7 +14,10 @@ fun PreferencesEntity.toDomain(): Preferences {
         favoriteFoods = JsonUtils.decode(favoriteFoods),
         favoriteSweets = JsonUtils.decode(favoriteSweets),
         dislikedThings = JsonUtils.decode(dislikedThings),
-        symptoms = JsonUtils.decode(symptoms)
+        symptoms = JsonUtils.decode(symptoms),
+        notificationsEnabled = notificationsEnabled,
+        notificationsTime = notificationsTime,
+        timesPerDay = timesPerDay
     )
 }
 
@@ -24,7 +27,10 @@ fun Preferences.toEntity(): PreferencesEntity {
         favoriteFoods = JsonUtils.encode(favoriteFoods),
         favoriteSweets = JsonUtils.encode(favoriteSweets),
         dislikedThings = JsonUtils.encode(dislikedThings),
-        symptoms = JsonUtils.encode(symptoms)
+        symptoms = JsonUtils.encode(symptoms),
+        notificationsEnabled = notificationsEnabled,
+        notificationsTime = notificationsTime,
+        timesPerDay = timesPerDay
     )
 }
 
@@ -34,7 +40,10 @@ fun PreferencesDto.toDomain(): Preferences {
         favoriteFoods = favoriteFoods,
         favoriteSweets = favoriteSweets,
         dislikedThings = dislikedThings,
-        symptoms = symptoms
+        symptoms = symptoms,
+        notificationsEnabled = notificationsEnabled,
+        notificationsTime = notificationsTime,
+        timesPerDay = timesPerDay
     )
 }
 
@@ -44,6 +53,9 @@ fun Preferences.toDto(): PreferencesDto {
         favoriteFoods = favoriteFoods,
         favoriteSweets = favoriteSweets,
         dislikedThings = dislikedThings,
-        symptoms = symptoms
+        symptoms = symptoms,
+        notificationsEnabled = notificationsEnabled,
+        notificationsTime = notificationsTime,
+        timesPerDay = timesPerDay
     )
 }
