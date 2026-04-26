@@ -27,28 +27,54 @@ import com.example.ela.core.utils.getPhaseTitle
 import com.example.ela.domain.model.CycleInfo
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.ui.components.ButtonComponent
+import com.example.ela.ui.components.CycleCalendar
 import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.*
 import com.example.ela.viewmodel.HomeViewModel
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onGoToCare: (CyclePhase) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    var showCalendar by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
 
     HomeContent(
         state = state,
-        onGoToCare = onGoToCare
+        onGoToCare = onGoToCare,
+        onOpenCalendar = { showCalendar = true }
     )
+
+    if (showCalendar) {
+        ModalBottomSheet(
+            onDismissRequest = { showCalendar = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            // No futuro, passaremos as datas reais do ViewModel aqui
+            CycleCalendar(
+                menstruationDays = emptyList(), // Mock por enquanto
+                fertileDays = emptyList(),
+                predictedDays = emptyList()
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
 }
 
 @Composable
 fun HomeContent(
     state: HomeUiState,
-    onGoToCare: (CyclePhase) -> Unit
+    onGoToCare: (CyclePhase) -> Unit,
+    onOpenCalendar: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -72,6 +98,22 @@ fun HomeContent(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     PhaseCardAnimated(info = state.cycleInfo)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botão para abrir calendário
+                    OutlinedButton(
+                        onClick = onOpenCalendar,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = getPhaseColor(state.cycleInfo.currentPhase)
+                        )
+                    ) {
+                        Icon(Icons.Default.Notifications, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ver calendário completo")
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -422,7 +464,8 @@ fun HomeContentPreview() {
     ElaTheme {
         HomeContent(
             state = HomeUiState(),
-            onGoToCare = {}
+            onGoToCare = {},
+            onOpenCalendar = {}
         )
     }
 }
