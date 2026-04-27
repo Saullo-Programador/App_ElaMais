@@ -1,5 +1,7 @@
 package com.example.ela.ui.screens.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -9,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Spa
@@ -36,6 +39,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -59,11 +63,13 @@ fun HomeScreen(
             containerColor = MaterialTheme.colorScheme.surface,
             dragHandle = { BottomSheetDefaults.DragHandle() }
         ) {
-            // No futuro, passaremos as datas reais do ViewModel aqui
+            val today = LocalDate.now()
+            // Simulação de dados para visualização
             CycleCalendar(
-                menstruationDays = emptyList(), // Mock por enquanto
-                fertileDays = emptyList(),
-                predictedDays = emptyList()
+                menstruationDays = listOf(today.minusDays(20), today.minusDays(19), today.minusDays(18)),
+                fertileDays = listOf(today.minusDays(8), today.minusDays(7), today.minusDays(6), today.minusDays(5)),
+                pmsDays = listOf(today.minusDays(2), today.minusDays(1), today),
+                predictedDays = listOf(today.plusDays(8), today.plusDays(9), today.plusDays(10))
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -102,18 +108,15 @@ fun HomeContent(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Botão para abrir calendário
-                    OutlinedButton(
+                    ButtonComponent(
                         onClick = onOpenCalendar,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = getPhaseColor(state.cycleInfo.currentPhase)
-                        )
-                    ) {
-                        Icon(Icons.Default.Notifications, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Ver calendário completo")
-                    }
+                        text = "Ver calendário completo",
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = getPhaseColor(state.cycleInfo.currentPhase)
+                        ),
+                        icon = Icons.Default.CalendarMonth,
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
