@@ -53,7 +53,8 @@ fun HomeScreen(
     HomeContent(
         state = state,
         onGoToCare = onGoToCare,
-        onOpenCalendar = { showCalendar = true }
+        onOpenCalendar = { showCalendar = true },
+        onPeriodStarted = { viewModel.onPeriodStarted() }
     )
 
     if (showCalendar) {
@@ -80,7 +81,8 @@ fun HomeScreen(
 fun HomeContent(
     state: HomeUiState,
     onGoToCare: (CyclePhase) -> Unit,
-    onOpenCalendar: () -> Unit
+    onOpenCalendar: () -> Unit,
+    onPeriodStarted: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -103,7 +105,10 @@ fun HomeContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    PhaseCardAnimated(info = state.cycleInfo)
+                    PhaseCardAnimated(
+                        info = state.cycleInfo,
+                        onPeriodStarted = onPeriodStarted
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -170,7 +175,10 @@ fun HeaderSection() {
 }
 
 @Composable
-fun PhaseCardAnimated(info: CycleInfo) {
+fun PhaseCardAnimated(
+    info: CycleInfo,
+    onPeriodStarted: () -> Unit
+) {
     val phaseColor = getPhaseColor(info.currentPhase)
     val gradientColors = listOf(
         phaseColor.copy(alpha = 0.8f),
@@ -180,7 +188,7 @@ fun PhaseCardAnimated(info: CycleInfo) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
+            .height(200.dp),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -232,13 +240,38 @@ fun PhaseCardAnimated(info: CycleInfo) {
                     label = "pulse"
                 )
 
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.8f))
-                        .animateContentSize()
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.8f))
+                            .animateContentSize()
+                    )
+
+                    if (info.daysUntilNextPeriod <= 5 && info.currentPhase != CyclePhase.MENSTRUAL) {
+                        Button(
+                            onClick = onPeriodStarted,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White,
+                                contentColor = phaseColor
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                            modifier = Modifier.height(36.dp)
+                        ) {
+                            Text(
+                                text = "Já desceu? 🩸",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -468,7 +501,8 @@ fun HomeContentPreview() {
         HomeContent(
             state = HomeUiState(),
             onGoToCare = {},
-            onOpenCalendar = {}
+            onOpenCalendar = {},
+            onPeriodStarted = {}
         )
     }
 }

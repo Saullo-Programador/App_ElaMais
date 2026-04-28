@@ -21,6 +21,7 @@ class NotificationHelper(private val context: Context) {
         const val NOTIFICATION_TYPE_IMPORTANT_DATE = "important_date"
         const val NOTIFICATION_TYPE_FERTILE_WINDOW = "fertile_window"
         const val NOTIFICATION_TYPE_MENSTRUATION = "menstruation"
+        const val NOTIFICATION_TYPE_PERIOD_CHECK = "period_check"
     }
 
     init {
@@ -62,7 +63,7 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(message)
@@ -70,10 +71,37 @@ class NotificationHelper(private val context: Context) {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
-            .build()
+
+        // Adiciona botões se for verificação de menstruação
+        if (type == NOTIFICATION_TYPE_PERIOD_CHECK) {
+            val desceuIntent = Intent(context, NotificationReceiver::class.java).apply {
+                action = NotificationReceiver.ACTION_PERIOD_STARTED
+                putExtra("notification_id", notificationId)
+            }
+            val desceuPendingIntent = PendingIntent.getBroadcast(
+                context,
+                notificationId + 100,
+                desceuIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val aindaNaoIntent = Intent(context, NotificationReceiver::class.java).apply {
+                action = NotificationReceiver.ACTION_NOT_YET
+                putExtra("notification_id", notificationId)
+            }
+            val aindaNaoPendingIntent = PendingIntent.getBroadcast(
+                context,
+                notificationId + 200,
+                aindaNaoIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            builder.addAction(0, "Desceu 🩸", desceuPendingIntent)
+            builder.addAction(0, "Ainda não", aindaNaoPendingIntent)
+        }
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(notificationId, notification)
+        notificationManager.notify(notificationId, builder.build())
     }
 
     fun cancelNotification(notificationId: Int) {

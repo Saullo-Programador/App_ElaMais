@@ -23,6 +23,7 @@ class NotificationScheduler(private val context: Context) {
         const val TYPE_IMPORTANT_DATE = "important_date"
         const val TYPE_FERTILE_WINDOW = "fertile_window"
         const val TYPE_MENSTRUATION = "menstruation"
+        const val TYPE_PERIOD_CHECK = "period_check"
 
         // Antecedência das notificações
         const val DAYS_BEFORE_3 = 3L
@@ -182,6 +183,59 @@ class NotificationScheduler(private val context: Context) {
             targetDate = nextPeriodStart,
             preferences = preferences
         )
+
+        // Agenda verificações diárias (3x ao dia) perto da data
+        schedulePeriodCheckNotifications(cycleId, nextPeriodStart, preferences)
+    }
+
+    /**
+     * Agenda verificações de "Já desceu?" respeitando as preferências da usuária
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun schedulePeriodCheckNotifications(
+        cycleId: Long,
+        nextPeriodStart: LocalDate,
+        preferences: Preferences
+    ) {
+        val daysToCheck = listOf(-2L, -1L, 0L, 1L) // 2 dias antes até 1 dia depois
+        val (baseHour, baseMinute) = preferences.notificationsTime.split(":").map { it.toInt() }
+        
+        // Usamos o número de vezes configurado, garantindo pelo menos 3 para este alerta importante
+        val timesPerDay = preferences.timesPerDay.coerceAtLeast(3)
+        val intervalHours = 15 / timesPerDay // Distribui as notificações em um intervalo de 15 horas
+
+        daysToCheck.forEach { dayOffset ->
+            val targetDate = nextPeriodStart.plusDays(dayOffset)
+
+            for (i in 0 until timesPerDay) {
+                val now = LocalDateTime.now()
+                val scheduledTime = targetDate.atTime(baseHour, baseMinute).plusHours((i * intervalHours).toLong())
+
+                if (scheduledTime.isAfter(now)) {
+                    val delay = Duration.between(now, scheduledTime).toMillis()
+                    val notificationId = generateNotificationId(cycleId, TYPE_PERIOD_CHECK, dayOffset) + (i * 10)
+
+                    val inputData = Data.Builder()
+                        .putInt(NotificationWorker.KEY_NOTIFICATION_ID, notificationId)
+                        .putString(NotificationWorker.KEY_TITLE, "Ela+")
+                        .putString(NotificationWorker.KEY_MESSAGE, "Já desceu por aí? 🩸")
+                        .putString(NotificationWorker.KEY_TYPE, TYPE_PERIOD_CHECK)
+                        .build()
+
+                    val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+                        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                        .setInputData(inputData)
+                        .addTag("notification_$TYPE_PERIOD_CHECK")
+                        .build()
+
+                    workManager.enqueueUniqueWork(
+                        "${NotificationWorker.WORK_NAME}_period_check_${notificationId}",
+                        ExistingWorkPolicy.REPLACE,
+                        workRequest
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -230,6 +284,14 @@ class NotificationScheduler(private val context: Context) {
     }
 
     /**
+     * Cancela todas as notificações relacionadas à menstruação (lembretes e verificações)
+     */
+    fun cancelAllMenstruationReminders() {
+        workManager.cancelAllWorkByTag("notification_$TYPE_MENSTRUATION")
+        workManager.cancelAllWorkByTag("notification_$TYPE_PERIOD_CHECK")
+    }
+
+    /**
      * Cancela notificações de uma data importante
      */
     fun cancelImportantDateNotifications(dateId: Long) {
@@ -248,6 +310,7 @@ class NotificationScheduler(private val context: Context) {
      */
     fun cancelMenstruationNotifications(cycleId: Long) {
         cancelNotificationsForType(cycleId, TYPE_MENSTRUATION)
+        workManager.cancelAllWorkByTag("notification_$TYPE_PERIOD_CHECK")
     }
 
     private fun cancelNotificationsForType(id: Long, type: String) {
@@ -266,6 +329,7 @@ class NotificationScheduler(private val context: Context) {
             TYPE_IMPORTANT_DATE -> (id * 100 + daysBefore).toInt()
             TYPE_FERTILE_WINDOW -> (id * 1000 + 100 + daysBefore).toInt()
             TYPE_MENSTRUATION -> (id * 1000 + 200 + daysBefore).toInt()
+            TYPE_PERIOD_CHECK -> (id * 1000 + 300 + (daysBefore + 10)).toInt()
             else -> id.toInt()
         }
     }

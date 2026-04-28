@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.usecase.cycle.GetCycleInfoUseCase
 import com.example.ela.domain.usecase.cycle.GetCycleUseCase
 import com.example.ela.domain.usecase.cycle_record.GetCycleHistoryUseCase
+import com.example.ela.domain.usecase.cycle_record.SaveCycleRecordUseCase
+import com.example.ela.notification.scheduler.NotificationScheduler
 import com.example.ela.ui.screens.home.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -15,7 +17,9 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getCycleUseCase: GetCycleUseCase,
     private val getCycleHistoryUseCase: GetCycleHistoryUseCase,
-    private val getCycleInfoUseCase: GetCycleInfoUseCase
+    private val getCycleInfoUseCase: GetCycleInfoUseCase,
+    private val saveCycleRecordUseCase: SaveCycleRecordUseCase,
+    private val notificationScheduler: NotificationScheduler
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -23,6 +27,13 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeCycle()
+    }
+
+    fun onPeriodStarted() {
+        viewModelScope.launch {
+            saveCycleRecordUseCase(System.currentTimeMillis())
+            notificationScheduler.cancelAllMenstruationReminders()
+        }
     }
 
     private fun observeCycle() {

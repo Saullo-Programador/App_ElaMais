@@ -8,10 +8,12 @@ class SaveCycleRecordUseCase @Inject constructor(
     private val repository: CycleRecordRepository
 ) {
 
-    suspend operator fun invoke(start: Long, end: Long) {
+    suspend operator fun invoke(start: Long, end: Long = 0) {
 
-        require(end >= start) {
-            "Data inválida"
+        if (end > 0) {
+            require(end >= start) {
+                "Data inválida"
+            }
         }
 
         repository.save(
