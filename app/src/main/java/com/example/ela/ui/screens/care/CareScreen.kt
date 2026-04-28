@@ -98,16 +98,8 @@ fun CareContent(
 
     var showAddDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {}
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Adicionar novos Cuidados")
-            }
-        }
-    ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             // Header com gradiente
             Box(
                 modifier = Modifier
@@ -185,6 +177,17 @@ fun CareContent(
                     )
                 }
             }
+        }
+
+        FloatingActionButton(
+            onClick = { showAddDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = phaseColor,
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Adicionar novos Cuidados")
         }
     }
     if (showAddDialog) {

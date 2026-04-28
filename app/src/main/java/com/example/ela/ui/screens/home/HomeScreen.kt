@@ -227,6 +227,30 @@ fun PhaseCardAnimated(
                     color = Color.White
                 )
 
+                val infoText = when {
+                    info.currentPhase == CyclePhase.MENSTRUAL -> {
+                        "Faltam ${info.daysRemainingInPhase} ${if (info.daysRemainingInPhase == 1) "dia" else "dias"} para acabar"
+                    }
+                    info.daysUntilFertileWindow > 0 -> {
+                        "Faltam ${info.daysUntilFertileWindow} ${if (info.daysUntilFertileWindow == 1) "dia" else "dias"} para o período fértil"
+                    }
+                    info.isFertileWindow -> {
+                        "Você está no período fértil! 💕"
+                    }
+                    info.daysUntilPms > 0 -> {
+                        "Faltam ${info.daysUntilPms} ${if (info.daysUntilPms == 1) "dia" else "dias"} para a TPM"
+                    }
+                    else -> {
+                        "Faltam ${info.daysUntilNextPeriod} ${if (info.daysUntilNextPeriod == 1) "dia" else "dias"} para a menstruação"
+                    }
+                }
+
+                Text(
+                    text = infoText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+
                 Spacer(modifier = Modifier.weight(1f))
 
                 val pulseAnimation = rememberInfiniteTransition(label = "pulse")

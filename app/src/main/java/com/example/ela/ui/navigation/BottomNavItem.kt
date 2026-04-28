@@ -23,7 +23,7 @@ val bottomNavItems = listOf(
     BottomNavItem(
         label = "Cuidados",
         icon = Icons.Outlined.FavoriteBorder,
-        route = Screen.Care.route
+        route = "care/FOLLICULAR"
     ),
     BottomNavItem(
         label = "Ciclo",

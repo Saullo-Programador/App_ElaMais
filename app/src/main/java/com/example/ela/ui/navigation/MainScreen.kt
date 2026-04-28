@@ -1,5 +1,7 @@
 package com.example.ela.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -19,6 +21,7 @@ import com.example.ela.ui.screens.reminder.ReminderScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
 

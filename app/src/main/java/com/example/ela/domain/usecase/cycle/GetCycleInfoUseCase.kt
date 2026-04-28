@@ -48,12 +48,28 @@ class GetCycleInfoUseCase @Inject constructor() {
         val phase = getPhaseSimple(currentDay, cycle)
         val daysUntilNext = (cycle.cycleLength - currentDay).coerceAtLeast(0)
 
-        val isFertile = currentDay in getFertileRange(cycle)
+        val fertileRange = getFertileRange(cycle)
+        val isFertile = currentDay in fertileRange
         val isPms = currentDay >= (cycle.cycleLength - 5)
+
+        val daysRemainingInPhase = if (phase == CyclePhase.MENSTRUAL) {
+            (cycle.periodLength - currentDay).coerceAtLeast(0)
+        } else 0
+
+        val daysUntilFertile = if (currentDay < fertileRange.first) {
+            fertileRange.first - currentDay
+        } else 0
+
+        val daysUntilPms = if (currentDay < (cycle.cycleLength - 5)) {
+            (cycle.cycleLength - 5) - currentDay
+        } else 0
 
         return CycleInfo(
             currentPhase = phase,
             daysUntilNextPeriod = daysUntilNext,
+            daysRemainingInPhase = daysRemainingInPhase,
+            daysUntilFertileWindow = daysUntilFertile,
+            daysUntilPms = daysUntilPms,
             isFertileWindow = isFertile,
             isPms = isPms,
             suggestions = getSuggestions(phase),
@@ -110,9 +126,30 @@ class GetCycleInfoUseCase @Inject constructor() {
 
         val phase = getPhaseAdvanced(currentDay, lastCycle, ovulationDay)
 
+        val periodLength = if (lastCycle.endDate > 0) {
+            daysBetween(lastCycle.startDate, lastCycle.endDate)
+        } else {
+            5
+        }
+
+        val daysRemainingInPhase = if (phase == CyclePhase.MENSTRUAL) {
+            (periodLength - currentDay).coerceAtLeast(0)
+        } else 0
+
+        val daysUntilFertile = if (currentDay < fertileRange.first) {
+            fertileRange.first - currentDay
+        } else 0
+
+        val daysUntilPms = if (currentDay < (avgCycle - 5)) {
+            (avgCycle - 5) - currentDay
+        } else 0
+
         return CycleInfo(
             currentPhase = phase,
             daysUntilNextPeriod = (avgCycle - currentDay).coerceAtLeast(0),
+            daysRemainingInPhase = daysRemainingInPhase,
+            daysUntilFertileWindow = daysUntilFertile,
+            daysUntilPms = daysUntilPms,
             isFertileWindow = isFertile,
             isPms = isPms,
             suggestions = getSuggestions(phase),
