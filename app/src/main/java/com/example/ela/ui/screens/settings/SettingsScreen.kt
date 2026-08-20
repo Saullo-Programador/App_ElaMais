@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -187,7 +189,7 @@ fun SettingsContent(
             )
 
             SettingSwitchItem(
-                icon = Icons.Default.VolumeUp,
+                icon = Icons.AutoMirrored.Filled.VolumeUp,
                 title = "Efeitos sonoros",
                 description = "Sons ao completar ações",
                 checked = soundEffects,
@@ -266,13 +268,13 @@ fun SettingsContent(
 
         // Botão Sair
         OutlinedButton(
-            onClick = { /* TODO: Implementar logout */ },
+            onClick = { /* Implementar logout */ },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
             )
         ) {
-            Icon(Icons.Default.Logout, contentDescription = null)
+            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sair da conta")
         }

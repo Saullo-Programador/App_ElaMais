@@ -15,8 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +38,6 @@ import com.example.ela.domain.model.CyclePhase
 import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
-import com.example.ela.ui.screens.reminder.AddReminderDialog
 import com.example.ela.ui.theme.*
 import com.example.ela.viewmodel.CareActionViewModel
 
@@ -251,7 +248,10 @@ fun AddCareDialog(
                         trailingIconDescription = "Selecionar fase",
                         onTrailingIconClick = { expanded = expanded },
                         modifier = Modifier
-                            .menuAnchor()
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = true
+                            )
                             .fillMaxWidth()
                     )
 
@@ -259,7 +259,7 @@ fun AddCareDialog(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        CyclePhase.values().forEach { phase ->
+                        CyclePhase.entries.forEach { phase ->
                             DropdownMenuItem(
                                 text = { Text(getPhaseTitle(phase)) },
                                 onClick = {
@@ -364,7 +364,7 @@ fun CareItem(
                         MaterialTheme.colorScheme.onSurface
                 )
 
-                action.description?.let {
+                action.description.let {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = it,

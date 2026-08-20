@@ -6,34 +6,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ela.domain.model.CyclePhase
-import com.example.ela.ui.navigation.BottomBar
-import com.example.ela.ui.navigation.Screen
 import com.example.ela.ui.screens.care.CareScreen
 import com.example.ela.ui.screens.cycle.CycleScreen
 import com.example.ela.ui.screens.home.HomeScreen
 import com.example.ela.ui.screens.reminder.ReminderScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
 
     val navController = rememberNavController()
-    val systemUiController = rememberSystemUiController()
-    val statusBarColor = MaterialTheme.colorScheme.onBackground
-    SideEffect {
-        systemUiController.setStatusBarColor(
-            color = statusBarColor,
-            darkIcons = false
-        )
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
