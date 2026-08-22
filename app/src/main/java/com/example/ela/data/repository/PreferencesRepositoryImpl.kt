@@ -20,7 +20,9 @@ class PreferencesRepositoryImpl(
     private val collection = firestore.collection("preferences")
 
     override fun getPreferences(): Flow<Preferences?> {
-        return dao.get().map { it?.toDomain() }
+        return dao.get().map { entity ->
+            entity?.toDomain()
+        }
     }
 
     override suspend fun savePreferences(preferences: Preferences) {
@@ -43,4 +45,16 @@ class PreferencesRepositoryImpl(
             }
         } catch (_: Exception) {}
     }
+
+    override suspend fun updateDarkMode(isDarkMode: Boolean) {
+        dao.updateDarkMode(isDarkMode)
+        try {
+            collection.document("user_preferences")
+                .update("isDarkMode", isDarkMode)
+                .await()
+        }catch (_: Exception){
+
+        }
+    }
+
 }

@@ -26,12 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun ButtonComponent(
     text: String,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium ,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -77,7 +79,7 @@ fun ButtonComponent(
 
                 Text(
                     text = text,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = textStyle,
                     color = textColor
                 )
             }

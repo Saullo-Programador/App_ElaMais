@@ -26,6 +26,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.ela.domain.model.Preferences
+import com.example.ela.ui.screens.settings.SettingsUiState
+import com.example.ela.ui.theme.Rose600
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun BottomBar(navController: NavController) {
@@ -91,11 +96,11 @@ fun BottomBar(navController: NavController) {
                         // Customização de cores para usar o esquema do tema
                         colors = NavigationBarItemDefaults.colors(
                             // Pílula de fundo do ícone selecionado
-                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            indicatorColor = MaterialTheme.colorScheme.primary,
 
                             // Ícone e Texto selecionados -> Usando sua cor primária
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            selectedIconColor = Color.White,
+                            selectedTextColor = MaterialTheme.colorScheme.onBackground,
 
                             // Ícone e Texto não selecionados -> Usando cores de variante do tema
                             unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),

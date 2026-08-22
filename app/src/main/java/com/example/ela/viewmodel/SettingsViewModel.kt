@@ -7,14 +7,16 @@ import com.example.ela.domain.usecase.notification.CancelNotificationsUseCase
 import com.example.ela.domain.usecase.notification.ScheduleImportantDateNotificationUseCase
 import com.example.ela.domain.usecase.preferences.GetPreferencesUseCase
 import com.example.ela.domain.usecase.preferences.SavePreferencesUseCase
+import com.example.ela.domain.usecase.preferences.UpdateDarkModeUseCase
 import com.example.ela.domain.usecase.settings.ClearAllDataUseCase
 import com.example.ela.ui.screens.settings.SettingsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val clearAllDataUseCase: ClearAllDataUseCase,
@@ -22,46 +24,89 @@ class SettingsViewModel @Inject constructor(
     private val getPreferencesUseCase: GetPreferencesUseCase,
     private val savePreferencesUseCase: SavePreferencesUseCase,
     private val scheduleImportantDateNotificationUseCase: ScheduleImportantDateNotificationUseCase,
+    private val updateDarkModeUseCase: UpdateDarkModeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState
 
-
     init {
+        observePreferences()
+    }
+
+    private fun observePreferences() {
         viewModelScope.launch {
             getPreferencesUseCase().collect { preferences ->
-                if (preferences != null) {
-                    _uiState.value = _uiState.value.copy(preferences = preferences)
-                }
+                    _uiState.update {
+                        it.copy(
+                            preferences = preferences ?: it.preferences,
+                            isLoading = false
+                        )
+                    }
             }
         }
     }
 
-
     fun toggleNotifications(enabled: Boolean) {
-        val currentPrefs = _uiState.value.preferences
-        val newPrefs = currentPrefs.copy(notificationsEnabled = enabled)
-        saveAndReschedule(newPrefs)
-    }
+        viewModelScope.launch {
 
-    fun updateNotificationTime(time: String) {
-        val currentPrefs = _uiState.value.preferences
-        val newPrefs = currentPrefs.copy(notificationsTime = time) // Use o nome correto do campo
-        saveAndReschedule(newPrefs)
-    }
+            val currentPrefs = getPreferencesUseCase().first()
+                ?: return@launch
 
-    fun updateFrequency(increase: Boolean) {
-        val currentPrefs = _uiState.value.preferences
-        val currentFreq = currentPrefs.timesPerDay
-        val newFreq = if (increase) (currentFreq + 1).coerceAtMost(3) else (currentFreq - 1).coerceAtLeast(1)
+            val newPrefs = currentPrefs.copy(
+                notificationsEnabled = enabled
+            )
 
-        if (newFreq != currentFreq) {
-            val newPrefs = currentPrefs.copy(timesPerDay = newFreq)
             saveAndReschedule(newPrefs)
         }
     }
 
+    fun updateNotificationTime(time: String) {
+        viewModelScope.launch {
+
+            val currentPrefs = getPreferencesUseCase().first()
+                ?: return@launch
+
+            val newPrefs = currentPrefs.copy(
+                notificationsTime = time
+            )
+
+            saveAndReschedule(newPrefs)
+        }
+    }
+
+    fun updateFrequency(increase: Boolean) {
+        viewModelScope.launch {
+
+            // 🔥 Busca o valor REAL do banco
+            val currentPrefs = getPreferencesUseCase().first()
+                ?: return@launch
+
+            val currentFreq = currentPrefs.timesPerDay
+
+            val newFreq = if (increase) {
+                (currentFreq + 1).coerceAtMost(3)
+            } else {
+                (currentFreq - 1).coerceAtLeast(1)
+            }
+
+            if (newFreq == currentFreq) {
+                return@launch
+            }
+
+            val newPrefs = currentPrefs.copy(
+                timesPerDay = newFreq
+            )
+
+            saveAndReschedule(newPrefs)
+        }
+    }
+
+    fun toggleDarkMode(enabled: Boolean) {
+        viewModelScope.launch {
+            updateDarkModeUseCase(enabled)
+        }
+    }
 
     private fun saveAndReschedule(preferences: Preferences){
         viewModelScope.launch {
@@ -78,30 +123,47 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
     fun clearAllData() {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isClearingData = true)
+                _uiState.update {
+                    it.copy(isClearingData = true)
+                }
+
                 clearAllDataUseCase()
-                // Cancela todas as notificações ao limpar dados
-                cancelNotificationsUseCase.cancelAllNotifications()
-                _uiState.value = _uiState.value.copy(
-                    isClearingData = false,
-                    dataClearedSuccess = true
-                )
+
+                cancelNotificationsUseCase
+                    .cancelAllNotifications()
+
+                _uiState.update {
+                    it.copy(
+                        isClearingData = false,
+                        dataClearedSuccess = true
+                    )
+                }
+
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isClearingData = false,
-                    errorMessage = e.message
-                )
+
+                _uiState.update {
+                    it.copy(
+                        isClearingData = false,
+                        errorMessage = e.message
+                    )
+                }
             }
         }
     }
+
     fun dismissSuccessMessage() {
-        _uiState.value = _uiState.value.copy(dataClearedSuccess = false)
+        _uiState.update {
+            it.copy(dataClearedSuccess = false)
+        }
     }
 
     fun dismissErrorMessage() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
+        _uiState.update {
+            it.copy(errorMessage = null)
+        }
     }
 }

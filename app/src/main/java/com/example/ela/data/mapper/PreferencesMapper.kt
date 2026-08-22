@@ -17,7 +17,8 @@ fun PreferencesEntity.toDomain(): Preferences {
         symptoms = JsonUtils.decode(symptoms),
         notificationsEnabled = notificationsEnabled,
         notificationsTime = notificationsTime,
-        timesPerDay = timesPerDay
+        timesPerDay = timesPerDay,
+        isDarkMode = isDarkMode
     )
 }
 
@@ -30,7 +31,8 @@ fun Preferences.toEntity(): PreferencesEntity {
         symptoms = JsonUtils.encode(symptoms),
         notificationsEnabled = notificationsEnabled,
         notificationsTime = notificationsTime,
-        timesPerDay = timesPerDay
+        timesPerDay = timesPerDay,
+        isDarkMode = isDarkMode
     )
 }
 
@@ -43,7 +45,8 @@ fun PreferencesDto.toDomain(): Preferences {
         symptoms = symptoms,
         notificationsEnabled = notificationsEnabled,
         notificationsTime = notificationsTime,
-        timesPerDay = timesPerDay
+        timesPerDay = timesPerDay,
+        isDarkMode = isDarkMode
     )
 }
 
@@ -56,6 +59,7 @@ fun Preferences.toDto(): PreferencesDto {
         symptoms = symptoms,
         notificationsEnabled = notificationsEnabled,
         notificationsTime = notificationsTime,
-        timesPerDay = timesPerDay
+        timesPerDay = timesPerDay,
+        isDarkMode = isDarkMode
     )
 }

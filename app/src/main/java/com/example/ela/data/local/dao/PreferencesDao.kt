@@ -18,4 +18,10 @@ interface PreferencesDao {
 
     @Query("DELETE FROM preferences")
     suspend fun deleteAll()
+
+    @Query("UPDATE preferences SET isDarkMode = :isDarkMode")
+    suspend fun updateDarkMode(
+        isDarkMode: Boolean
+    )
+
 }

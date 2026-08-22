@@ -1,5 +1,7 @@
 package com.example.ela.ui.screens.cycle
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,14 +17,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ela.domain.model.Cycle
+import com.example.ela.ui.components.ButtonComponent
 import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
+import com.example.ela.ui.screens.home.getPhaseColor
 import com.example.ela.ui.theme.ElaTheme
 import com.example.ela.viewmodel.CycleViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CycleScreen(
     viewModel: CycleViewModel = hiltViewModel()
@@ -131,7 +136,7 @@ fun CycleContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
+        ButtonComponent(
             onClick = {
                 val cycleLen = cycleLength.toIntOrNull() ?: 28
                 val periodLen = periodLength.toIntOrNull() ?: 5
@@ -145,12 +150,15 @@ fun CycleContent(
                 onSave(cycle)
             },
             shape = MaterialTheme.shapes.medium,
+            text = "Salvar Configurações",
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+
             modifier = Modifier
                 .height(56.dp)
                 .fillMaxWidth()
-        ) {
-            Text("Salvar Configurações", style = MaterialTheme.typography.titleMedium)
-        }
+        )
     }
 
     if (showDatePicker) {

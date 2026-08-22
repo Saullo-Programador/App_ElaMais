@@ -9,4 +9,5 @@ data class Preferences(
     val notificationsEnabled: Boolean = true,
     val notificationsTime: String = "08:00",
     val timesPerDay: Int = 1,
+    val isDarkMode: Boolean = false
 )

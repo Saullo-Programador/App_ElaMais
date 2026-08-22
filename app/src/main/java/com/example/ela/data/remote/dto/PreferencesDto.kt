@@ -8,5 +8,6 @@ data class PreferencesDto(
     val symptoms: List<String> = emptyList(),
     val notificationsEnabled: Boolean = true,
     val notificationsTime: String = "08:00",
-    val timesPerDay: Int = 1
+    val timesPerDay: Int = 1,
+    val isDarkMode: Boolean = false
 )

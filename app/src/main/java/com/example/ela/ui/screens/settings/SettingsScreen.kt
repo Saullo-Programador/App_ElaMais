@@ -32,7 +32,8 @@ fun SettingsScreen(
         onDismissError = { viewModel.dismissErrorMessage() },
         onToggleNotifications = { viewModel.toggleNotifications(it) },
         onUpdateTime = { viewModel.updateNotificationTime(it) },
-        onUpdateFrequency = { viewModel.updateFrequency(it) }
+        onUpdateFrequency = { viewModel.updateFrequency(it) },
+        onToggleDarkMode = { viewModel.toggleDarkMode(it) }
     )
 }
 
@@ -42,9 +43,11 @@ fun SettingsContent(
     onToggleNotifications: (Boolean) -> Unit,
     onUpdateTime: (String) -> Unit,
     onUpdateFrequency: (Boolean) -> Unit,
+    onToggleDarkMode: (Boolean) -> Unit,
     onClearAllData: () -> Unit = {},
     onDismissSuccess: () -> Unit = {},
     onDismissError: () -> Unit = {},
+
 ) {
     val scrollState = rememberScrollState()
     var showClearDataDialog by remember { mutableStateOf(false) }
@@ -177,15 +180,15 @@ fun SettingsContent(
 
         // Preferências
         SettingsSection(title = "Preferências") {
-            var darkTheme by remember { mutableStateOf(false) }
+
             var soundEffects by remember { mutableStateOf(true) }
 
             SettingSwitchItem(
                 icon = Icons.Default.DarkMode,
                 title = "Tema escuro",
                 description = "Usar tema escuro no app",
-                checked = darkTheme,
-                onCheckedChange = { darkTheme = it }
+                checked = uiState.preferences.isDarkMode,
+                onCheckedChange = onToggleDarkMode
             )
 
             SettingSwitchItem(
@@ -433,7 +436,8 @@ fun SettingsScreenPreview() {
             uiState = SettingsUiState(),
             onToggleNotifications = {},
             onUpdateTime = {},
-            onUpdateFrequency = {}
+            onUpdateFrequency = {},
+            onToggleDarkMode = {}
         )
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,6 +22,7 @@ import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.ElaTheme
+import com.example.ela.ui.theme.Rose600
 import com.example.ela.viewmodel.ReminderViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,9 +52,10 @@ fun ReminderContent(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
+                containerColor = Rose600,
                 onClick = { showAddDialog = true }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Adicionar lembrete")
+                Icon(Icons.Default.Add, contentDescription = "Adicionar lembrete", tint = Color.White)
             }
         }
     ) { padding ->
@@ -121,6 +124,9 @@ fun ReminderCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(

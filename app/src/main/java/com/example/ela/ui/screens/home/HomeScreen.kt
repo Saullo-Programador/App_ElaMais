@@ -117,10 +117,12 @@ fun HomeContent(
                         onClick = onOpenCalendar,
                         modifier = Modifier.fillMaxWidth(),
                         text = "Ver calendário completo",
+                        textColor = Color.White,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = getPhaseColor(state.cycleInfo.currentPhase)
                         ),
                         icon = Icons.Default.CalendarMonth,
+                        iconColor = Color.White
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -147,7 +149,9 @@ fun HomeContent(
                             defaultElevation = 4.dp
                         ),
                         text = "Ver cuidados recomendados ❤️",
+                        textColor = Color.White,
                         icon = Icons.Default.Spa,
+                        iconColor = Color.White
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -414,6 +418,7 @@ fun AlertsCard(info: CycleInfo) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Tudo tranquilo por enquanto",
+                    color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

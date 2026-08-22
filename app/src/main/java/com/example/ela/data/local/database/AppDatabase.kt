@@ -27,7 +27,7 @@ import com.example.ela.data.local.entity.ReminderEntity
         PreferencesEntity::class,
         CycleRecordEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
