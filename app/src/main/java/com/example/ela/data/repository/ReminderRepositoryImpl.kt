@@ -26,10 +26,13 @@ class ReminderRepositoryImpl (
     }
 
     override suspend fun saveReminder(reminder: Reminder) {
-        dao.insert(reminder.toEntity())
+        val generatedId = dao.insert(reminder.toEntity())
+        val reminderWithId = reminder.copy(
+            id = generatedId
+        )
         try {
             collection.document(reminder.id.toString())
-                .set(reminder.toDto())
+                .set(reminderWithId.toDto())
                 .await()
         } catch (e: Exception) {
             // falhou? tudo bem, já salvou local

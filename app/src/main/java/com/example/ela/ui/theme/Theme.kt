@@ -42,36 +42,60 @@ private val DarkColorScheme = darkColorScheme(
     surfaceTint = Rose300,
     scrim = WarmGray900
 )
-
 private val LightColorScheme = lightColorScheme(
+    // Principal
     primary = Rose600,
-    onPrimary = WarmGray50,
+    onPrimary = Color.White,
+
+    // Container da cor principal
     primaryContainer = Rose100,
     onPrimaryContainer = Rose900,
+
+    // Secundária
     secondary = Lavender600,
-    onSecondary = WarmGray50,
+    onSecondary = Color.White,
     secondaryContainer = Lavender100,
     onSecondaryContainer = Lavender900,
+
+    // Terciária
     tertiary = Coral500,
-    onTertiary = WarmGray50,
+    onTertiary = Color.White,
     tertiaryContainer = Coral100,
     onTertiaryContainer = Coral900,
+
+    // Fundo geral do aplicativo
     background = Color.White,
     onBackground = WarmGray900,
-    surface = WarmGray50,
+
+    // Superfícies / Cards
+    surface = Color.White,
     onSurface = WarmGray900,
-    surfaceVariant = Rose100,
+
+    // IMPORTANTE:
+    // não usar Rose100 aqui
+    surfaceVariant = WarmGray100,
     onSurfaceVariant = WarmGray700,
+
+    // Erros
     error = Rose600,
-    onError = WarmGray50,
+    onError = Color.White,
     errorContainer = Rose100,
     onErrorContainer = Rose900,
+
+    // Bordas
     outline = WarmGray400,
     outlineVariant = WarmGray200,
+
+    // Superfície inversa
     inverseSurface = WarmGray800,
     inverseOnSurface = WarmGray50,
+
+    // Cor principal inversa
     inversePrimary = Rose300,
+
+    // Evita tonalização rosa nas superfícies
     surfaceTint = Rose600,
+
     scrim = WarmGray900
 )
 

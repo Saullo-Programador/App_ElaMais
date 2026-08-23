@@ -3,6 +3,7 @@ package com.example.ela.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.Reminder
+import com.example.ela.domain.usecase.reminder.DeleteReminderUseCase
 import com.example.ela.domain.usecase.reminder.GetRemindersUseCase
 import com.example.ela.domain.usecase.reminder.SaveReminderUseCase
 import com.example.ela.ui.screens.reminder.ReminderUiState
@@ -15,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReminderViewModel @Inject constructor(
     private val getRemindersUseCase: GetRemindersUseCase,
-    private val saveReminderUseCase: SaveReminderUseCase
+    private val saveReminderUseCase: SaveReminderUseCase,
+    private val deleteReminderUseCase: DeleteReminderUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReminderUiState())
@@ -39,6 +41,12 @@ class ReminderViewModel @Inject constructor(
     fun save(reminder: Reminder) {
         viewModelScope.launch {
             saveReminderUseCase(reminder)
+        }
+    }
+
+    fun delete(reminder: Reminder){
+        viewModelScope.launch {
+            deleteReminderUseCase(reminder)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.ela.ui.screens.reminder
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,12 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ela.domain.model.Reminder
 import com.example.ela.ui.components.ButtonComponent
-import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.ElaTheme
@@ -37,6 +38,9 @@ fun ReminderScreen(
         state = state,
         onSave = { reminder ->
             viewModel.save(reminder)
+        },
+        onDelete = { reminder ->
+            viewModel.delete(reminder)
         }
     )
 }
@@ -45,7 +49,8 @@ fun ReminderScreen(
 @Composable
 fun ReminderContent(
     state: ReminderUiState,
-    onSave: (Reminder) -> Unit
+    onSave: (Reminder) -> Unit,
+    onDelete: (Reminder) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -68,7 +73,7 @@ fun ReminderContent(
             Text(
                 text = "Lembretes",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -84,7 +89,7 @@ fun ReminderContent(
             when {
                 state.isLoading -> LoadingView()
                 state.reminders.isEmpty() -> EmptyRemindersView()
-                else -> RemindersList(reminders = state.reminders)
+                else -> RemindersList(reminders = state.reminders, onDelete = onDelete)
             }
         }
     }
@@ -101,7 +106,7 @@ fun ReminderContent(
 }
 
 @Composable
-fun RemindersList(reminders: List<Reminder>) {
+fun RemindersList(reminders: List<Reminder>, onDelete: (Reminder) -> Unit) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     LazyColumn(
@@ -111,7 +116,8 @@ fun RemindersList(reminders: List<Reminder>) {
         items(reminders) { reminder ->
             ReminderCard(
                 reminder = reminder,
-                dateFormatter = dateFormatter
+                dateFormatter = dateFormatter,
+                onDelete = onDelete
             )
         }
     }
@@ -120,8 +126,12 @@ fun RemindersList(reminders: List<Reminder>) {
 @Composable
 fun ReminderCard(
     reminder: Reminder,
+    onDelete: (Reminder) -> Unit,
     dateFormatter: SimpleDateFormat
 ) {
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -140,7 +150,7 @@ fun ReminderCard(
                 Text(
                     text = reminder.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    fontWeight = FontWeight.Bold
                 )
                 if (reminder.description.isNotBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
@@ -159,13 +169,25 @@ fun ReminderCard(
                 if (reminder.type.isNotBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
                     AssistChip(
-                        onClick = { },
-                        label = { Text(reminder.type) }
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = reminder.type,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.background
+                        ),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
             }
 
-            IconButton(onClick = { /* TODO: Implementar delete */ }) {
+            IconButton(onClick = { showDeleteDialog = true }) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = "Excluir",
@@ -173,6 +195,16 @@ fun ReminderCard(
                 )
             }
         }
+    }
+    if (showDeleteDialog) {
+        DeleteReminderDialog(
+            onDismiss = { showDeleteDialog = false },
+            onDelete = { reminder ->
+                onDelete(reminder)
+                showDeleteDialog = false
+            },
+            reminder = reminder
+        )
     }
 }
 
@@ -323,13 +355,58 @@ fun AddReminderDialog(
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeleteReminderDialog(
+    reminder: Reminder,
+    onDismiss: () -> Unit,
+    onDelete: (Reminder) -> Unit
+) {
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Deletar Lembrete") },
+        text = { Text("Tem certeza que deseja deletar esse lembrete?")},
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onDelete(reminder)
+                },
+            ) {
+                Text("Deletar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ReminderScreenPreview() {
     ElaTheme {
-        ReminderContent(
-            state = ReminderUiState(isLoading = false),
-            onSave = {}
+//        ReminderContent(
+//            state = ReminderUiState(isLoading = false),
+//            onSave = {},
+//            onDelete = {}
+//        )
+        ReminderCard(
+            reminder = Reminder(
+                id = 1,
+                title = "Testando",
+                description = "Descrição do card de lembrete",
+                date = 1787507460183,
+                type = "Geral"
+            ),
+            onDelete = {},
+            dateFormatter = SimpleDateFormat(
+                "dd/MM/yyyy HH:mm",
+                Locale.getDefault()
+            )
         )
     }
 }
