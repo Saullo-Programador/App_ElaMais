@@ -10,13 +10,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ela.domain.model.Reminder
 import com.example.ela.ui.components.ButtonComponent
@@ -95,7 +99,7 @@ fun ReminderContent(
     }
 
     if (showAddDialog) {
-        AddReminderDialog(
+        AddReminderModal(
             onDismiss = { showAddDialog = false },
             onSave = { reminder ->
                 onSave(reminder)
@@ -234,7 +238,7 @@ fun EmptyRemindersView() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddReminderDialog(
+fun AddReminderModal(
     onDismiss: () -> Unit,
     onSave: (Reminder) -> Unit
 ) {
@@ -246,12 +250,27 @@ fun AddReminderDialog(
 
     val reminderTypes = listOf("Geral", "Medicação", "Consulta", "Exame")
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Novo Lembrete") },
-        text = {
+        containerColor = MaterialTheme.colorScheme.background
+    ){
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+        ) {
+        Text(
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .align(Alignment.CenterHorizontally),
+            text = "Novo Lembrete",
+            textAlign = TextAlign.Center,
+            fontSize = 22.sp,
+            style = TextStyle(fontWeight = FontWeight.Bold)
+        )
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
             ) {
                 InputComponent(
                     value = title,
@@ -259,8 +278,6 @@ fun AddReminderDialog(
                     label = "Título",
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 InputComponent(
                     value = description,
@@ -273,7 +290,8 @@ fun AddReminderDialog(
 
                 Text(
                     text = "Tipo",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
 
@@ -297,33 +315,52 @@ fun AddReminderDialog(
                     onClick = { showDatePicker = true },
                 )
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (title.isNotBlank()) {
-                        onSave(
-                            Reminder(
-                                id = 0,
-                                title = title,
-                                description = description,
-                                date = selectedDate,
-                                type = selectedType
-                            )
-                        )
-                    }
-                },
-                enabled = title.isNotBlank()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Salvar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                ButtonComponent(
+                    text = "Cancelar",
+                    onClick = onDismiss,
+                    textColor = MaterialTheme.colorScheme.primary,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+
+                ButtonComponent(
+                    text = "Salvar",
+                    textColor = if (title.isNotBlank()){
+                        MaterialTheme.colorScheme.onBackground
+                    }else{
+                        MaterialTheme.colorScheme.onBackground
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    ),
+                    onClick = {
+                        if (title.isNotBlank()) {
+                            onSave(
+                                Reminder(
+                                    id = 0,
+                                    title = title,
+                                    description = description,
+                                    date = selectedDate,
+                                    type = selectedType
+                                )
+                            )
+                        }
+                    },
+                    enabled = title.isNotBlank(),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
-    )
+    }
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
@@ -331,6 +368,10 @@ fun AddReminderDialog(
         )
 
         DatePickerDialog(
+            colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.background,
+                titleContentColor = MaterialTheme.colorScheme.background
+            ),
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
@@ -350,7 +391,9 @@ fun AddReminderDialog(
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(state = datePickerState, colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.background
+            ))
         }
     }
 }
@@ -389,11 +432,19 @@ fun DeleteReminderDialog(
 @Composable
 fun ReminderScreenPreview() {
     ElaTheme {
-//        ReminderContent(
-//            state = ReminderUiState(isLoading = false),
-//            onSave = {},
-//            onDelete = {}
-//        )
+        ReminderContent(
+            state = ReminderUiState(isLoading = false),
+            onSave = {},
+            onDelete = {}
+        )
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun ReminderCardPreview() {
+    ElaTheme {
         ReminderCard(
             reminder = Reminder(
                 id = 1,
