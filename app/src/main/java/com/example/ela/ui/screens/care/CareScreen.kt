@@ -212,6 +212,7 @@ fun AddCareDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.background,
         title = { Text("Novo Cuidados") },
         text = {
             Column(

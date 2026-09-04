@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
@@ -16,6 +17,7 @@ import com.example.ela.ui.screens.cycle.CycleScreen
 import com.example.ela.ui.screens.home.HomeScreen
 import com.example.ela.ui.screens.reminder.ReminderScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
+import com.example.ela.ui.theme.ElaTheme
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -86,4 +88,13 @@ fun MainScreen() {
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun PreviewMainScreen(){
+    ElaTheme(
+        content = { MainScreen() }
+    )
 }

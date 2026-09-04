@@ -20,21 +20,25 @@ val bottomNavItems = listOf(
         icon = Icons.Outlined.Home,
         route = Screen.Home.route
     ),
+
     BottomNavItem(
         label = "Cuidados",
         icon = Icons.Outlined.FavoriteBorder,
         route = "care/FOLLICULAR"
     ),
+
     BottomNavItem(
         label = "Ciclo",
         icon = Icons.Outlined.CalendarMonth,
         route = Screen.Cycle.route
     ),
+
     BottomNavItem(
         label = "Lembretes",
         icon = Icons.Outlined.Notifications,
         route = Screen.Reminder.route
     ),
+
     BottomNavItem(
         label = "Config",
         icon = Icons.Outlined.Settings,

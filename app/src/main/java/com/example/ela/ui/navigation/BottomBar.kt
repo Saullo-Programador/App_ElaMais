@@ -1,113 +1,194 @@
 package com.example.ela.ui.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.ela.domain.model.Preferences
-import com.example.ela.ui.screens.settings.SettingsUiState
-import com.example.ela.ui.theme.Rose600
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(
+    navController: NavController
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
 
-    // Itens da barra (certifique-se que bottomNavItems esteja acessível)
-    val items = bottomNavItems
-
-    // O container principal para centralizar a barra flutuante
-    Row(
+    Surface(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
             .fillMaxWidth()
-            .navigationBarsPadding() // Garante espaço para a barra de navegação do sistema
-            .padding(bottom = 16.dp), // Margem inferior da barra em relação à tela
-        horizontalArrangement = Arrangement.Center // Centraliza a barra horizontalmente
+            .navigationBarsPadding()
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 12.dp
+            ),
+        color = Color.Transparent
     ) {
-        // O Surface que cria a "pílula" branca flutuante
-        Surface(
+
+        Row(
             modifier = Modifier
-                .widthIn(max = 400.dp) // Define uma largura máxima opcional
-                .height(80.dp), // Altura fixa para os itens
-            shape = RoundedCornerShape(percent = 50), // Cantos totalmente arredondados (forma de pílula)
-            color = MaterialTheme.colorScheme.background,
-            tonalElevation = 8.dp, // Sombra sutil para flutuar
-            shadowElevation = 8.dp // Sombra mais definida para o efeito flutuante
+                .fillMaxWidth()
+                .height(68.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(
+                    MaterialTheme.colorScheme.surface
+                )
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(
+                        alpha = 0.10f
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                )
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // A Row que organiza os itens dentro da pílula
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp) // Espaçamento interno nas laterais
-                    .selectableGroup(), // Importante para acessibilidade
-                horizontalArrangement = Arrangement.SpaceEvenly, // Espaçamento uniforme entre itens
-                verticalAlignment = Alignment.CenterVertically // Centraliza itens verticalmente
-            ) {
-                items.forEach { item ->
-                    // Verifica a seleção (melhorado para hierarquia)
-                    val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
 
-                    // Usamos NavigationBarItem para manter o comportamento M3, mas dentro da nossa Row
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                // Simplificando a navegação para evitar problemas de estado travado
-                                popUpTo(navController.graph.findStartDestination().id)
-                                launchSingleTop = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = item.icon, // Supondo que você use ImageVector
-                                contentDescription = item.label
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = item.label,
-                                style = MaterialTheme.typography.labelSmall // Fonte menor como na imagem
-                            )
-                        },
-                        // Customização de cores para usar o esquema do tema
-                        colors = NavigationBarItemDefaults.colors(
-                            // Pílula de fundo do ícone selecionado
-                            indicatorColor = MaterialTheme.colorScheme.primary,
+            bottomNavItems.forEach { item ->
 
-                            // Ícone e Texto selecionados -> Usando sua cor primária
-                            selectedIconColor = Color.White,
-                            selectedTextColor = MaterialTheme.colorScheme.onBackground,
-
-                            // Ícone e Texto não selecionados -> Usando cores de variante do tema
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    )
+                val isSelected = if (
+                    item.route.startsWith("care/")
+                ) {
+                    currentRoute?.startsWith("care/") == true
+                } else {
+                    currentDestination
+                        ?.hierarchy
+                        ?.any {
+                            it.route == item.route
+                        } == true
                 }
+
+                BottomBarItem(
+                    item = item,
+                    selected = isSelected,
+                    onClick = {
+
+                        if (isSelected) return@BottomBarItem
+
+                        navController.navigate(item.route) {
+
+                            popUpTo(
+                                navController.graph.findStartDestination().id
+                            ) {
+                                saveState = true
+                            }
+
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomBarItem(
+    item: BottomNavItem,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+
+    val iconColor =
+        if (selected) {
+            primaryColor
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                alpha = 0.65f
+            )
+        }
+
+    val textColor =
+        if (selected) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                alpha = 0.65f
+            )
+        }
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = if (selected) 12.dp else 8.dp,
+                vertical = 8.dp
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (selected) {
+                            primaryColor.copy(alpha = 0.12f)
+                        } else {
+                            Color.Transparent
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.label,
+                    modifier = Modifier.size(22.dp),
+                    tint = iconColor
+                )
+            }
+
+            if (selected) {
+
+                Spacer(
+                    modifier = Modifier.width(6.dp)
+                )
+
+                Text(
+                    text = item.label,
+                    color = textColor,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1
+                )
             }
         }
     }

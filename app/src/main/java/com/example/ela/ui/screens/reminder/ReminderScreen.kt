@@ -408,6 +408,7 @@ fun DeleteReminderDialog(
 ) {
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text("Deletar Lembrete") },
         text = { Text("Tem certeza que deseja deletar esse lembrete?")},
