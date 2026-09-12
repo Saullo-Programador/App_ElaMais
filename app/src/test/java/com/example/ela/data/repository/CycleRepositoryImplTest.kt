@@ -5,6 +5,8 @@ import com.example.ela.data.local.dao.CycleDao
 import com.example.ela.data.local.entity.CycleEntity
 import com.example.ela.domain.model.Cycle
 import com.google.firebase.firestore.FirebaseFirestore
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -119,14 +121,14 @@ class CycleRepositoryImplTest {
             lastPeriodStart = 1725148800000L
         )
 
-        every { dao.insertCycle(any()) } returns Unit
+        coEvery { dao.insertCycle(any()) } returns Unit
         // O mock relaxed do firestore cuidará do .set().await()
 
         // Act
         repository.saveCycle(cycle)
 
         // Assert
-        verify { dao.insertCycle(any()) }
+        coVerify { dao.insertCycle(any()) }
     }
 
         @Test
@@ -134,7 +136,7 @@ class CycleRepositoryImplTest {
             // Arrange
             val cycle = Cycle(1, 28, 5, 1725148800000L)
 
-            every { dao.insertCycle(any()) } returns Unit
+            coEvery { dao.insertCycle(any()) } returns Unit
 
             // Forçamos o firestore a lançar exceção no collection ou document
             every { firebaseFirestore.collection("cycles") } throws RuntimeException("Firebase Error")
@@ -143,7 +145,7 @@ class CycleRepositoryImplTest {
             repository.saveCycle(cycle)
 
             // Assert
-            verify { dao.insertCycle(any()) } // Deve ter salvado localmente
+            coVerify { dao.insertCycle(any()) } // Deve ter salvado localmente
         }
 
         @Test
@@ -164,7 +166,7 @@ class CycleRepositoryImplTest {
                 mockk<com.google.android.gms.tasks.Task<com.google.firebase.firestore.DocumentSnapshot>>()
             every { mockTask.isComplete } returns true
             every { mockTask.isSuccessful } returns true
-            every { mockTask.getResult } returns mockDocument
+            coEvery { mockTask.getResult() } returns mockDocument
 
             val docRef = mockk<com.google.firebase.firestore.DocumentReference>()
             every { docRef.get() } returns mockTask
@@ -173,12 +175,12 @@ class CycleRepositoryImplTest {
             every { collRef.document("user_cycle") } returns docRef
 
             every { firebaseFirestore.collection("cycles") } returns collRef
-            every { dao.insertCycle(any()) } returns Unit
+            coEvery { dao.insertCycle(any()) } returns Unit
 
             // Act
             repository.syncCycle()
 
             // Assert
-            verify { dao.insertCycle(any()) }
+            coVerify { dao.insertCycle(any()) }
         }
     }
