@@ -33,6 +33,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -76,6 +77,8 @@ dependencies {
 
     // Coil (imagens)
     implementation(libs.coil.compose)
+
+    coreLibraryDesugaring(libs.core.library.desugaring)
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)

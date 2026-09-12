@@ -1,8 +1,6 @@
 package com.example.ela.notification.scheduler
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -37,7 +35,6 @@ class NotificationScheduler(private val context: Context) {
      * Agenda notificações para uma data importante
      * Notifica 3 dias antes, 1 dia antes e no dia
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleImportantDateNotification(
         dateId: Long,
         title: String,
@@ -84,7 +81,6 @@ class NotificationScheduler(private val context: Context) {
      * Agenda notificações para período fértil
      * Calcula o período fértil baseado no ciclo e agenda notificações
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleFertileWindowNotifications(
         cycleId: Long,
         lastPeriodStart: Long,
@@ -137,7 +133,6 @@ class NotificationScheduler(private val context: Context) {
      * Agenda notificações para menstruação
      * Notifica 3 dias antes, 1 dia antes e no primeiro dia
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleMenstruationNotifications(
         cycleId: Long,
         lastPeriodStart: Long,
@@ -191,7 +186,6 @@ class NotificationScheduler(private val context: Context) {
     /**
      * Agenda verificações de "Já desceu?" respeitando as preferências da usuária
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun schedulePeriodCheckNotifications(
         cycleId: Long,
         nextPeriodStart: LocalDate,
@@ -241,7 +235,6 @@ class NotificationScheduler(private val context: Context) {
     /**
      * Agenda uma única notificação
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun scheduleNotification(
         notificationId: Int,
         title: String,

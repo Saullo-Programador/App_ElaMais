@@ -1,7 +1,5 @@
 package com.example.ela.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.Cycle
@@ -40,7 +38,6 @@ class CycleViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun saveCycle(cycle: Cycle) {
         viewModelScope.launch {
             try {

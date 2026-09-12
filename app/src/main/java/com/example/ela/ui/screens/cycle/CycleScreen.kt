@@ -1,8 +1,6 @@
 package com.example.ela.ui.screens.cycle
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,7 +26,6 @@ import com.example.ela.viewmodel.CycleViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CycleScreen(
     viewModel: CycleViewModel = hiltViewModel()

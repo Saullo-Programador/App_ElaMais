@@ -1,7 +1,5 @@
 package com.example.ela.ui.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -28,7 +26,6 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.*
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CycleCalendar(
     selectedDate: LocalDate = LocalDate.now(),
@@ -40,7 +37,7 @@ fun CycleCalendar(
     var currentMonth by remember { mutableStateOf(YearMonth.from(selectedDate)) }
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfMonth = currentMonth.atDay(1).dayOfWeek.value % 7
-    
+
     val days = (1..daysInMonth).map { currentMonth.atDay(it) }
     val emptyDaysBefore = (0 until firstDayOfMonth).map { null }
 
@@ -97,7 +94,7 @@ fun CycleCalendar(
                 userScrollEnabled = false
             ) {
                 items(emptyDaysBefore) { Spacer(modifier = Modifier.size(40.dp)) }
-                
+
                 items(days) { date ->
                     val isMenstruation = menstruationDays.contains(date)
                     val isFertile = fertileDays.contains(date)

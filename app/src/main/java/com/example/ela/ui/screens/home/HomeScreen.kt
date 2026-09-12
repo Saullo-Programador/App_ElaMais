@@ -1,7 +1,5 @@
 package com.example.ela.ui.screens.home
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -39,7 +37,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(

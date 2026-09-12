@@ -1,7 +1,6 @@
 package com.example.ela.domain.usecase.cycle
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.ela.domain.model.Cycle
 import com.example.ela.domain.model.CycleCalendarDates
 import com.example.ela.domain.model.CycleRecord
@@ -12,7 +11,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
 
-@RequiresApi(Build.VERSION_CODES.O)
 class GetCycleCalendarDatesUseCase @Inject constructor() {
 
     operator fun invoke(

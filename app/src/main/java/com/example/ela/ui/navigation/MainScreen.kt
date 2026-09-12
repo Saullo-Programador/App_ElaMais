@@ -1,7 +1,5 @@
 package com.example.ela.ui.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,7 +22,6 @@ import com.example.ela.ui.screens.settings.SettingsScreen
 import com.example.ela.viewmodel.HomeViewModel
 import com.example.ela.ui.theme.ElaTheme
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
@@ -102,7 +99,6 @@ fun MainScreen() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun PreviewMainScreen(){
