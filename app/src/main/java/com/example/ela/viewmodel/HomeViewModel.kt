@@ -1,0 +1,62 @@
+package com.example.ela.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.ela.domain.usecase.cycle.GetCycleInfoUseCase
+import com.example.ela.domain.usecase.cycle.GetCycleUseCase
+import com.example.ela.domain.usecase.cycle.GetCycleCalendarDatesUseCase
+import com.example.ela.domain.usecase.cycle_record.GetCycleHistoryUseCase
+import com.example.ela.domain.usecase.cycle_record.SaveCycleRecordUseCase
+import com.example.ela.notification.scheduler.NotificationScheduler
+import com.example.ela.ui.screens.home.HomeUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val getCycleUseCase: GetCycleUseCase,
+    private val getCycleHistoryUseCase: GetCycleHistoryUseCase,
+    private val getCycleInfoUseCase: GetCycleInfoUseCase,
+    private val getCycleCalendarDatesUseCase: GetCycleCalendarDatesUseCase,
+    private val saveCycleRecordUseCase: SaveCycleRecordUseCase,
+    private val notificationScheduler: NotificationScheduler
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(HomeUiState())
+    val state: StateFlow<HomeUiState> = _state
+
+    init {
+        observeCycle()
+    }
+
+    fun onPeriodStarted() {
+        viewModelScope.launch {
+            saveCycleRecordUseCase(System.currentTimeMillis())
+            notificationScheduler.cancelAllMenstruationReminders()
+        }
+    }
+
+    private fun observeCycle() {
+        viewModelScope.launch {
+            combine(
+                getCycleUseCase(),
+                getCycleHistoryUseCase()
+            ) { cycle, history ->
+                val info = getCycleInfoUseCase(cycle, history)
+                val dates = getCycleCalendarDatesUseCase(cycle, history)
+
+                Pair(info, dates)
+            }.catch {
+                _state.value = HomeUiState(error = it.message)
+            }.collect { (info, dates) ->
+                _state.value = HomeUiState(
+                    isLoading = false,
+                    cycleInfo = info,
+                    calendarDates = dates
+                )
+            }
+        }
+    }
+}
