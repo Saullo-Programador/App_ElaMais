@@ -3,13 +3,17 @@ package com.example.ela.data.repository
 import app.cash.turbine.test
 import com.example.ela.data.local.dao.CycleDao
 import com.example.ela.data.local.entity.CycleEntity
+import com.example.ela.data.remote.dto.CycleDto
 import com.example.ela.domain.model.Cycle
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -26,12 +30,13 @@ class CycleRepositoryImplTest {
     @Before
     fun setup() {
         dao = mockk()
-
         firebaseFirestore = mockk()
+
+        val collection = mockk<CollectionReference>()
 
         every {
             firebaseFirestore.collection("cycles")
-        } returns mockk(relaxed = true)
+        } returns collection
 
         repository = CycleRepositoryImpl(
             dao,
@@ -42,7 +47,6 @@ class CycleRepositoryImplTest {
     @Test
     fun `deve mapear cycle entity para domain`() = runTest {
 
-        // Arrange
         val entity = CycleEntity(
             id = 1,
             cycleLength = 28,
@@ -54,66 +58,41 @@ class CycleRepositoryImplTest {
             dao.getCycle()
         } returns flowOf(entity)
 
-        // Act
-        repository.getCycle()
-            .test {
+        repository.getCycle().test {
 
-                val result = awaitItem()
+            val result = awaitItem()
 
-                // Assert
-                assertNotNull(result)
+            assertNotNull(result)
 
-                assertEquals(
-                    entity.id,
-                    result.id
-                )
+            assertEquals(entity.id, result.id)
+            assertEquals(entity.cycleLength, result.cycleLength)
+            assertEquals(entity.periodLength, result.periodLength)
+            assertEquals(entity.lastPeriodStart, result.lastPeriodStart)
 
-                assertEquals(
-                    entity.cycleLength,
-                    result.cycleLength
-                )
-
-                assertEquals(
-                    entity.periodLength,
-                    result.periodLength
-                )
-
-                assertEquals(
-                    entity.lastPeriodStart,
-                    result.lastPeriodStart
-                )
-
-                cancelAndIgnoreRemainingEvents()
-            }
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun `deve retornar null quando nao existir ciclo`() = runTest {
 
-        // Arrange
         every {
             dao.getCycle()
         } returns flowOf(null)
 
-        // Act
-        repository.getCycle()
-            .test {
+        repository.getCycle().test {
 
-                val result = awaitItem()
+            val result = awaitItem()
 
-                // Assert
-                assertEquals(
-                    null,
-                    result
-                )
+            assertEquals(null, result)
 
-                cancelAndIgnoreRemainingEvents()
-            }
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun `deve salvar ciclo localmente e tentar salvar no firebase`() = runTest {
-        // Arrange
+
         val cycle = Cycle(
             id = 1,
             cycleLength = 28,
@@ -121,66 +100,132 @@ class CycleRepositoryImplTest {
             lastPeriodStart = 1725148800000L
         )
 
-        coEvery { dao.insertCycle(any()) } returns Unit
-        // O mock relaxed do firestore cuidará do .set().await()
+        val collection = mockk<CollectionReference>()
+        val document = mockk<DocumentReference>()
 
-        // Act
+        every {
+            firebaseFirestore.collection("cycles")
+        } returns collection
+
+        every {
+            collection.document("user_cycle")
+        } returns document
+
+        // Task real já concluído
+        every {
+            document.set(any())
+        } returns Tasks.forResult(null)
+
+        coEvery {
+            dao.insertCycle(any())
+        } returns Unit
+
+        repository = CycleRepositoryImpl(
+            dao,
+            firebaseFirestore
+        )
+
         repository.saveCycle(cycle)
 
-        // Assert
-        coVerify { dao.insertCycle(any()) }
+        coVerify {
+            dao.insertCycle(any())
+        }
     }
 
-        @Test
-        fun `deve salvar localmente mesmo se firebase falhar`() = runTest {
-            // Arrange
-            val cycle = Cycle(1, 28, 5, 1725148800000L)
+    @Test
+    fun `deve salvar localmente mesmo se firebase falhar`() = runTest {
 
-            coEvery { dao.insertCycle(any()) } returns Unit
+        val cycle = Cycle(
+            id = 1,
+            cycleLength = 28,
+            periodLength = 5,
+            lastPeriodStart = 1725148800000L
+        )
 
-            // Forçamos o firestore a lançar exceção no collection ou document
-            every { firebaseFirestore.collection("cycles") } throws RuntimeException("Firebase Error")
+        val collection = mockk<CollectionReference>()
+        val document = mockk<DocumentReference>()
 
-            // Act
-            repository.saveCycle(cycle)
+        every {
+            firebaseFirestore.collection("cycles")
+        } returns collection
 
-            // Assert
-            coVerify { dao.insertCycle(any()) } // Deve ter salvado localmente
+        every {
+            collection.document("user_cycle")
+        } returns document
+
+        every {
+            document.set(any())
+        } throws RuntimeException("Firebase Error")
+
+        coEvery {
+            dao.insertCycle(any())
+        } returns Unit
+
+        repository = CycleRepositoryImpl(
+            dao,
+            firebaseFirestore
+        )
+
+        repository.saveCycle(cycle)
+
+        coVerify {
+            dao.insertCycle(any())
         }
+    }
 
-        @Test
-        fun `deve sincronizar ciclo do firebase para o banco local`() = runTest {
-            // Arrange
-            val mockDto = com.example.ela.data.remote.dto.CycleDto(
-                id = 1,
-                cycleLength = 30,
-                periodLength = 6,
-                lastPeriodStart = 1725148800000L
+    @Test
+    fun `deve sincronizar ciclo do firebase para o banco local`() = runTest {
+
+        val mockDto = CycleDto(
+            id = 1,
+            cycleLength = 30,
+            periodLength = 6,
+            lastPeriodStart = 1725148800000L
+        )
+
+        val mockDocument = mockk<DocumentSnapshot>()
+
+        every {
+            mockDocument.toObject(CycleDto::class.java)
+        } returns mockDto
+
+        val documentReference = mockk<DocumentReference>()
+
+        val collection = mockk<CollectionReference>()
+
+        every {
+            firebaseFirestore.collection("cycles")
+        } returns collection
+
+        every {
+            collection.document("user_cycle")
+        } returns documentReference
+
+        // Task real concluído
+        every {
+            documentReference.get()
+        } returns Tasks.forResult(mockDocument)
+
+        coEvery {
+            dao.insertCycle(any())
+        } returns Unit
+
+        repository = CycleRepositoryImpl(
+            dao,
+            firebaseFirestore
+        )
+
+        repository.syncCycle()
+
+        coVerify {
+            dao.insertCycle(
+                match {
+                    it.id.toInt() == 1 &&
+                            it.cycleLength == 30 &&
+                            it.periodLength == 6 &&
+                            it.lastPeriodStart == 1725148800000L
+                }
             )
-
-            // Mock complexo para simular o Task do Firebase
-            val mockDocument = mockk<com.google.firebase.firestore.DocumentSnapshot>()
-            every { mockDocument.toObject(com.example.ela.data.remote.dto.CycleDto::class.java) } returns mockDto
-
-            val mockTask =
-                mockk<com.google.android.gms.tasks.Task<com.google.firebase.firestore.DocumentSnapshot>>()
-            every { mockTask.isComplete } returns true
-            every { mockTask.isSuccessful } returns true
-            coEvery { mockTask.getResult() } returns mockDocument
-
-            val docRef = mockk<com.google.firebase.firestore.DocumentReference>()
-            every { docRef.get() } returns mockTask
-
-            val collRef = mockk<com.google.firebase.firestore.CollectionReference>()
-            every { collRef.document("user_cycle") } returns docRef
-
-            every { firebaseFirestore.collection("cycles") } returns collRef
-            coEvery { dao.insertCycle(any()) } returns Unit
-
-            // Act
-            repository.syncCycle()
-
-            // Assert
-            coVerify { dao.insertCycle(any()) }
         }
     }
+}
