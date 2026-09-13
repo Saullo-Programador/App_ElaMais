@@ -21,11 +21,11 @@ O **Ela+** é um aplicativo Android moderno focado em saúde feminina, projetado
 
 ## 🖼️ Visualização
 
-*(Adicione aqui screenshots do app ou um GIF de demonstração para tornar o projeto mais atraente)*
+| Home Screen | Ciclo | Cuidados | Lembrete | Configurações |
+| :---: | :---: | :---: | :---: | :---: |
+| <img width="200" height="457" alt="Homee" src="https://github.com/user-attachments/assets/6cea0014-d00a-4cc3-bc71-0e86e617a290" /> | <img width="200" height="457" alt="Ciclo" src="https://github.com/user-attachments/assets/1c9c6bca-3cbf-4689-8fac-368b544fce81" /> | <img width="200" height="457" alt="Cuidado" src="https://github.com/user-attachments/assets/01d57587-74e8-42e1-8c25-f1b490bd32f3" /> | <img width="200" height="457" alt="Lembrete" src="https://github.com/user-attachments/assets/815da481-67fa-4f94-910c-caf5e669bb3b" /> | <img width="200" height="457" alt="configurações" src="https://github.com/user-attachments/assets/8044d913-ee18-4e40-aa9f-fec486903e2e" /> |
 
-| Home Screen | Configurações | Ciclo/Fases |
-| :---: | :---: | :---: |
-| ![Home](https://via.placeholder.com/200x400?text=Home+Screen) | ![Prefs](https://via.placeholder.com/200x400?text=Preferences) | ![Cycle](https://via.placeholder.com/200x400?text=Cycle+View) |
+
 
 ---
 
