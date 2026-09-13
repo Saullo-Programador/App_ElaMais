@@ -1,5 +1,6 @@
 package com.example.ela.data.repository
 
+import android.util.Log
 import com.example.ela.data.local.dao.CycleDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -34,7 +35,11 @@ class CycleRepositoryImpl (
                 .set(cycle.toDto())
                 .await()
         }catch (e: Exception){
-            // falhou? tudo bem, já salvou local
+            Log.e(
+                "CycleRepository",
+                "Erro ao sincronizar ciclo com Firebase",
+                e
+            )
         }
     }
 
@@ -47,7 +52,11 @@ class CycleRepositoryImpl (
                 dao.insertCycle(it.toDomain().toEntity())
             }
         }catch (e: Exception){
-            // sem internet -> ignora
+            Log.e(
+                "CycleRepository",
+                "Erro ao sincronizar ciclo do Firebase",
+                e
+            )
         }
     }
 

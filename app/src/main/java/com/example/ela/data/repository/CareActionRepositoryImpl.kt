@@ -1,5 +1,6 @@
 package com.example.ela.data.repository
 
+import android.util.Log
 import com.example.ela.data.local.dao.CareActionDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toEntity
@@ -53,26 +54,34 @@ class CareActionRepositoryImpl(
         )
     )
 
-    override fun getByPhase(phase: CyclePhase): Flow<List<CareAction>> = dao.getByPhase(phase.name).map { entities ->
-        val dbActions = entities.map { it.toDomain() }
+    override fun getByPhase(
+        phase: CyclePhase
+    ): Flow<List<CareAction>> =
+        dao.getByPhase(phase.name)
+            .map { entities ->
+                entities.map { it.toDomain() }
+            }
+
+    override suspend fun initializeDefaults(phase: CyclePhase) {
         val defaults = defaultActions[phase] ?: emptyList()
 
-        // Mescla as dicas padrão com o que está no banco
-        // Se a dica padrão estiver no banco, usa o estado do banco (isCompleted)
-        val merged = defaults.map { default ->
-            dbActions.find { it.id == default.id } ?: default
-        }
-
-        // Adiciona também as ações que o usuário criou manualmente (que não estão nos defaults)
-        val userCreated = dbActions.filter { dbAction ->
-            defaults.none { it.id == dbAction.id }
-        }
-
-        merged + userCreated
+        dao.insertAll(
+            defaults.map { it.toEntity() }
+        )
     }
 
     override suspend fun update(action: CareAction) {
-        dao.update(action.toEntity())
+        val entity = action.toEntity()
+
+        val rowsUpdated = dao.update(entity)
+
+        Log.d(
+            "CareAction",
+            "Update: id=${entity.id}, " +
+                    "title=${entity.title}, " +
+                    "isCompleted=${entity.isCompleted}, " +
+                    "rowsUpdated=$rowsUpdated"
+        )
     }
 
     override suspend fun save(action: CareAction) {

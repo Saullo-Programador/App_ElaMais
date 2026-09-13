@@ -13,4 +13,6 @@ interface CareActionRepository {
     suspend fun save(action: CareAction)
 
     suspend fun resetCompletedActions()
+
+    suspend fun initializeDefaults(phase: CyclePhase)
 }

@@ -95,7 +95,7 @@ fun CareContent(
 
     var showAddDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Header com gradiente
             Box(
@@ -309,7 +309,7 @@ fun CareItem(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (action.isCompleted)
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         else
             MaterialTheme.colorScheme.surface,
         label = "background"
@@ -326,6 +326,9 @@ fun CareItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(
+                    color = backgroundColor
+                )
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

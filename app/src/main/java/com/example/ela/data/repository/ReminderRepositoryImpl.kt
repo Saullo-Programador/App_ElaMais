@@ -1,5 +1,6 @@
 package com.example.ela.data.repository
 
+import android.util.Log
 import com.example.ela.data.local.dao.ReminderDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -35,7 +36,11 @@ class ReminderRepositoryImpl (
                 .set(reminderWithId.toDto())
                 .await()
         } catch (e: Exception) {
-            // falhou? tudo bem, já salvou local
+            Log.e(
+                "ReminderRepository",
+                "Erro ao sincronizar Lembrete com Firebase",
+                e
+            )
         }
     }
 
@@ -46,7 +51,11 @@ class ReminderRepositoryImpl (
                 .delete()
                 .await()
         } catch (e: Exception) {
-            // falhou? tudo bem, já salvou local
+            Log.e(
+                "ReminderRepository",
+                "Erro ao sincronizar Lembrete com Firebase",
+                e
+            )
         }
     }
 
@@ -62,7 +71,11 @@ class ReminderRepositoryImpl (
                 dao.insert(it.toDomain().toEntity())
             }
         }catch (e: Exception){
-            // sem internet -> ignora
+            Log.e(
+                "ReminderRepository",
+                "Erro ao sincronizar Lembrete com Firebase",
+                e
+            )
         }
     }
 

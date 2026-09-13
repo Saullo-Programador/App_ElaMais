@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.Preferences
 import com.example.ela.domain.usecase.preferences.GetPreferencesUseCase
 import com.example.ela.domain.usecase.preferences.SavePreferencesUseCase
-import com.example.ela.domain.usecase.preferences.UpdateDarkModeUseCase
 import com.example.ela.ui.screens.preferences.PreferencesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

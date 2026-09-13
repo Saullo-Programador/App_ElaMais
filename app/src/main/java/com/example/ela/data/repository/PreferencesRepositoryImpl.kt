@@ -1,5 +1,6 @@
 package com.example.ela.data.repository
 
+import android.util.Log
 import com.example.ela.data.local.dao.PreferencesDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -33,7 +34,13 @@ class PreferencesRepositoryImpl(
             collection.document("user_preferences")
                 .set(preferences.toDto())
                 .await()
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e(
+                "PreferencesRepository",
+                "Erro ao sincronizar Preferências do Firebase",
+                e
+            )
+        }
     }
 
     override suspend fun syncPreferences() {
@@ -44,7 +51,13 @@ class PreferencesRepositoryImpl(
             dto?.let {
                 dao.save(it.toDomain().toEntity())
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e(
+                "PreferencesRepository",
+                "Erro ao sincronizar Preferências do Firebase",
+                e
+            )
+        }
     }
 
     override suspend fun updateDarkMode(isDarkMode: Boolean) {

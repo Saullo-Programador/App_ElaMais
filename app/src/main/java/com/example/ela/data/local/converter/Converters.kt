@@ -2,7 +2,6 @@ package com.example.ela.data.local.converter
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 class Converters {

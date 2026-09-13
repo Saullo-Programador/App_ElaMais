@@ -2,20 +2,17 @@ package com.example.ela.ui.screens.preferences
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ela.domain.model.Cycle
 import com.example.ela.domain.model.Preferences
@@ -197,7 +194,7 @@ fun PreferencesContent(
 }
 
 @Composable
-fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun SectionHeader(title: String, icon: ImageVector) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -214,6 +211,25 @@ fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.Image
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreferencesContentPreview(){
+    ElaTheme {
+        PreferencesContent(
+            preferences = Preferences(),
+            cycle = Cycle(
+                id = 1,
+                cycleLength = 28,
+                periodLength = 5,
+                lastPeriodStart = 1725148800000L
+            ),
+            onSavePreferences = {},
+            onSaveCycle = {}
         )
     }
 }

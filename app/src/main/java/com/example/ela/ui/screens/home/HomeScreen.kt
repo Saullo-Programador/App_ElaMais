@@ -1,5 +1,6 @@
 package com.example.ela.ui.screens.home
 
+import android.content.res.Configuration
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -23,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ela.core.utils.getPhaseTitle
 import com.example.ela.domain.model.CycleInfo
 import com.example.ela.domain.model.CyclePhase
@@ -33,9 +33,7 @@ import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.*
 import com.example.ela.viewmodel.HomeViewModel
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -461,9 +459,10 @@ fun SuggestionsCard(info: CycleInfo) {
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+
 
             info.suggestions.forEach { suggestion ->
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -531,10 +530,68 @@ fun getPhaseColor(phase: CyclePhase): Color {
 
 @Preview(showBackground = true)
 @Composable
-fun HomeContentPreview() {
+fun HomeEmptyViewPreview() {
     ElaTheme {
         HomeContent(
             state = HomeUiState(isLoading = false),
+            onGoToCare = {},
+            onOpenCalendar = {},
+            onPeriodStarted = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeContentPreview() {
+    ElaTheme {
+        HomeContent(
+            state = HomeUiState(
+                isLoading = false,
+                cycleInfo = CycleInfo(
+                    currentPhase = CyclePhase.MENSTRUAL,
+                    daysUntilNextPeriod = 0,
+                    daysRemainingInPhase = 0,
+                    daysUntilFertileWindow = 0,
+                    daysUntilPms = 0,
+                    isFertileWindow = false,
+                    isPms = false,
+                    suggestions = emptyList(),
+                    hasData = false
+                ),
+
+
+            ),
+            onGoToCare = {},
+            onOpenCalendar = {},
+            onPeriodStarted = {}
+        )
+    }
+}
+
+@Preview(showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun HomeContentPreviewDark() {
+    ElaTheme {
+        HomeContent(
+            state = HomeUiState(
+                isLoading = false,
+                cycleInfo = CycleInfo(
+                    currentPhase = CyclePhase.MENSTRUAL,
+                    daysUntilNextPeriod = 0,
+                    daysRemainingInPhase = 0,
+                    daysUntilFertileWindow = 0,
+                    daysUntilPms = 0,
+                    isFertileWindow = false,
+                    isPms = false,
+                    suggestions = emptyList(),
+                    hasData = false
+                ),
+
+
+                ),
             onGoToCare = {},
             onOpenCalendar = {},
             onPeriodStarted = {}

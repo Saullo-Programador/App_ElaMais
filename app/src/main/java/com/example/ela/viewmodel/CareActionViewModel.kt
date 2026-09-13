@@ -1,10 +1,12 @@
 package com.example.ela.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.CareAction
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.domain.usecase.care.GetCareActionsByPhaseUseCase
+import com.example.ela.domain.usecase.care.InitializeCareActionsUseCase
 import com.example.ela.domain.usecase.care.SaveCareActionUseCase
 import com.example.ela.domain.usecase.care.UpdateCareActionUseCase
 import com.example.ela.ui.screens.care.CareActionUiState
@@ -20,7 +22,8 @@ import javax.inject.Inject
 class CareActionViewModel @Inject constructor(
     private val getCareActionsByPhaseUseCase: GetCareActionsByPhaseUseCase,
     private val updateCareActionUseCase: UpdateCareActionUseCase,
-    private val saveCareActionUseCase: SaveCareActionUseCase
+    private val saveCareActionUseCase: SaveCareActionUseCase,
+    private val initializeCareActionsUseCase : InitializeCareActionsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CareActionUiState())
@@ -34,17 +37,18 @@ class CareActionViewModel @Inject constructor(
      * Carrega as ações de cuidado baseado na fase do ciclo
      */
     fun load(phase: CyclePhase) {
-
-        // Cancela qualquer coleta anterior
         loadJob?.cancel()
 
-        _state.value = _state.value.copy(
-            isLoading = true,
-            phase = phase,
-            error = null
-        )
-
         loadJob = viewModelScope.launch {
+
+            initializeCareActionsUseCase(phase)
+
+            _state.value = _state.value.copy(
+                isLoading = true,
+                phase = phase,
+                error = null
+            )
+
             getCareActionsByPhaseUseCase(phase)
                 .catch { e ->
                     _state.value = _state.value.copy(
@@ -67,9 +71,21 @@ class CareActionViewModel @Inject constructor(
      */
     fun toggleDone(action: CareAction) {
         viewModelScope.launch {
+
+            Log.d(
+                "CareAction",
+                "Checkbox clicado: ${action.title} | antes=${action.isCompleted}"
+            )
+
             val updated = action.copy(
                 isCompleted = !action.isCompleted
             )
+
+            Log.d(
+                "CareAction",
+                "Novo estado: ${updated.isCompleted}"
+            )
+
             updateCareActionUseCase(updated)
         }
     }

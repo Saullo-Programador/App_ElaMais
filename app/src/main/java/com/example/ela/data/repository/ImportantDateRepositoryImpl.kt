@@ -1,5 +1,6 @@
 package com.example.ela.data.repository
 
+import android.util.Log
 import com.example.ela.data.local.dao.ImportantDateDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -26,26 +27,36 @@ class ImportantDateRepositoryImpl(
     }
 
     override suspend fun saveDate(date: ImportantDate) {
+        // 🔹 Salva local primeiro (offline-first)
         dao.insert(date.toEntity())
-
+        // 🔹 Tenta enviar pro Firebase
         try {
             collection.document(date.id.toString())
                 .set(date.toDto())
                 .await()
         } catch (e: Exception) {
-            // falhou? tudo bem, já salvou local
+            Log.e(
+                "ImportantDateRepository",
+                "Erro ao sincronizar Data Importantes do Firebase",
+                e
+            )
         }
     }
 
     override suspend fun deleteDate(date: ImportantDate) {
+        // 🔹 Deletou local primeiro (offline-first)
         dao.delete(date.toEntity())
-
+        // 🔹 Tenta enviar pro Firebase
         try {
             collection.document(date.id.toString())
                 .delete()
                 .await()
         } catch (e: Exception) {
-            // falhou? tudo bem, já salvou local
+            Log.e(
+                "ImportantDateRepository",
+                "Erro ao sincronizar Data Importantes do Firebase",
+                e
+            )
         }
     }
 
@@ -61,7 +72,11 @@ class ImportantDateRepositoryImpl(
                 dao.insert(it.toDomain().toEntity())
             }
         } catch (e: Exception) {
-            // sem internet -> ignora
+            Log.e(
+                "ImportantDateRepository",
+                "Erro ao sincronizar Data Importantes do Firebase",
+                e
+            )
         }
     }
 }

@@ -14,11 +14,14 @@ interface CareActionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(action: CareActionEntity)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAll(actions: List<CareActionEntity>)
+
     @Query("SELECT * FROM care_actions WHERE phase = :phase")
     fun getByPhase(phase: String): Flow<List<CareActionEntity>>
 
     @Update
-    suspend fun update(action: CareActionEntity)
+    suspend fun update(action: CareActionEntity): Int
 
     @Query("UPDATE care_actions SET isCompleted = 0")
     suspend fun resetAllCompletions()

@@ -49,7 +49,7 @@ fun CycleContent(
     val scrollState = rememberScrollState()
     var cycleLength by remember { mutableStateOf(state.cycle?.cycleLength?.toString() ?: "28") }
     var periodLength by remember { mutableStateOf(state.cycle?.periodLength?.toString() ?: "5") }
-    var lastPeriodStart by remember { mutableStateOf(state.cycle?.lastPeriodStart ?: System.currentTimeMillis()) }
+    var lastPeriodStart by remember { mutableLongStateOf(state.cycle?.lastPeriodStart ?: System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())

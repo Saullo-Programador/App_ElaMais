@@ -12,34 +12,59 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
+    // Principal
     primary = Rose600,
     onPrimary = Rose900,
+
+    // Container da cor principal
     primaryContainer = Rose700,
     onPrimaryContainer = Rose100,
-    secondary = Lavender300,
-    onSecondary = Lavender900,
-    secondaryContainer = Lavender700,
-    onSecondaryContainer = Lavender100,
+
+    // Secundária
+    secondary = Lavender600,
+    onSecondary = Color.White,
+    secondaryContainer = Lavender100,
+    onSecondaryContainer = Lavender900,
+
+    // Terciária
     tertiary = Coral300,
     onTertiary = Coral900,
     tertiaryContainer = Coral700,
     onTertiaryContainer = Coral100,
+
+    // Fundo geral do aplicativo
     background = WarmGray900,
     onBackground = WarmGray100,
+
+    // Superfícies / Cards
     surface = WarmGray800,
     onSurface = WarmGray100,
+
+    // IMPORTANTE:
+    // não usar Rose100 aqui
     surfaceVariant = WarmGray700,
     onSurfaceVariant = WarmGray300,
+
+    // Erros
     error = Rose500,
     onError = WarmGray50,
     errorContainer = Rose900,
     onErrorContainer = Rose100,
+
+    // Bordas
     outline = WarmGray500,
     outlineVariant = WarmGray700,
+
+    // Superfície inversa
     inverseSurface = WarmGray100,
     inverseOnSurface = WarmGray900,
+
+    // Cor principal inversa
     inversePrimary = Rose400,
+
+    // Evita tonalização rosa nas superfícies
     surfaceTint = Rose300,
+
     scrim = WarmGray900
 )
 private val LightColorScheme = lightColorScheme(

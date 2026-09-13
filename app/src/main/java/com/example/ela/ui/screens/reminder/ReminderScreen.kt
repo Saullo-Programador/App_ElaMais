@@ -245,7 +245,7 @@ fun AddReminderModal(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("Geral") }
-    var selectedDate by remember { mutableStateOf(System.currentTimeMillis()) }
+    var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     val reminderTypes = listOf("Geral", "Medicação", "Consulta", "Exame")
@@ -435,31 +435,34 @@ fun DeleteReminderDialog(
 fun ReminderScreenPreview() {
     ElaTheme {
         ReminderContent(
-            state = ReminderUiState(isLoading = false),
+            state = ReminderUiState(
+                isLoading = false,
+                reminders = listOf(
+                    Reminder(
+                        id = 1,
+                        title = "Teste 1",
+                        description = "Descrição do card de lembrete",
+                        date = 1787507460183,
+                        type = "Geral"
+                    ),
+                    Reminder(
+                        id = 2,
+                        title = "Teste 2",
+                        description = "Descrição do card de lembrete",
+                        date = 1787507460183,
+                        type = "Geral"
+                    ),
+                    Reminder(
+                        id = 3,
+                        title = "Teste 3",
+                        description = "Descrição do card de lembrete",
+                        date = 1787507460183,
+                        type = "Geral"
+                    )
+                )
+            ),
             onSave = {},
             onDelete = {}
-        )
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun ReminderCardPreview() {
-    ElaTheme {
-        ReminderCard(
-            reminder = Reminder(
-                id = 1,
-                title = "Testando",
-                description = "Descrição do card de lembrete",
-                date = 1787507460183,
-                type = "Geral"
-            ),
-            onDelete = {},
-            dateFormatter = SimpleDateFormat(
-                "dd/MM/yyyy HH:mm",
-                Locale.getDefault()
-            )
         )
     }
 }
