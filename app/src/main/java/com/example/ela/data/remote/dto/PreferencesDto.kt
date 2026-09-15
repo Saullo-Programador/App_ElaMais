@@ -1,5 +1,8 @@
 package com.example.ela.data.remote.dto
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PreferencesDto(
     val id: String = "",
     val favoriteFoods: List<String> = emptyList(),

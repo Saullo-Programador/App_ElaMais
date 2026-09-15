@@ -3,6 +3,7 @@ package com.example.ela.viewmodel
 import com.example.ela.domain.model.CareAction
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.domain.usecase.care.GetCareActionsByPhaseUseCase
+import com.example.ela.domain.usecase.care.InitializeCareActionsUseCase
 import com.example.ela.domain.usecase.care.SaveCareActionUseCase
 import com.example.ela.domain.usecase.care.UpdateCareActionUseCase
 import io.mockk.coEvery
@@ -23,6 +24,8 @@ class CareActionViewModelTest {
     private val getCareActionsByPhaseUseCase = mockk<GetCareActionsByPhaseUseCase>()
     private val updateCareActionUseCase = mockk<UpdateCareActionUseCase>()
     private val saveCareActionUseCase = mockk<SaveCareActionUseCase>()
+
+    private val initializeCareActionsUseCase = mockk<InitializeCareActionsUseCase>()
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -51,7 +54,8 @@ class CareActionViewModelTest {
         val viewModel = CareActionViewModel(
             getCareActionsByPhaseUseCase,
             updateCareActionUseCase,
-            saveCareActionUseCase
+            saveCareActionUseCase,
+            initializeCareActionsUseCase
         )
 
         // Ação
@@ -79,7 +83,8 @@ class CareActionViewModelTest {
         val viewModel = CareActionViewModel(
             getCareActionsByPhaseUseCase,
             updateCareActionUseCase,
-            saveCareActionUseCase
+            saveCareActionUseCase,
+            initializeCareActionsUseCase,
         )
 
         // Ação
@@ -105,7 +110,8 @@ class CareActionViewModelTest {
         val viewModel = CareActionViewModel(
             getCareActionsByPhaseUseCase,
             updateCareActionUseCase,
-            saveCareActionUseCase
+            saveCareActionUseCase,
+            initializeCareActionsUseCase
         )
 
         // Ação

@@ -17,6 +17,7 @@ import com.example.ela.domain.model.CyclePhase
 import com.example.ela.ui.screens.care.CareScreen
 import com.example.ela.ui.screens.cycle.CycleScreen
 import com.example.ela.ui.screens.home.HomeScreen
+import com.example.ela.ui.screens.preferences.PreferencesScreen
 import com.example.ela.ui.screens.reminder.ReminderScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
 import com.example.ela.viewmodel.HomeViewModel
@@ -93,7 +94,15 @@ fun MainScreen() {
 
             // ⚙️ SETTINGS
             composable(Screen.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(
+                    onClickPreferences = {
+                        navController.navigate(Screen.Preferences.route)
+                    }
+                )
+            }
+
+            composable(Screen.Preferences.route) {
+                PreferencesScreen()
             }
         }
     }

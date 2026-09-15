@@ -18,17 +18,18 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class CareActionRepositoryImplTest {
+
     private lateinit var dao: CareActionDao
     private lateinit var repository: CareActionRepositoryImpl
 
     @Before
-    fun setup(){
+    fun setup() {
         dao = mockk()
         repository = CareActionRepositoryImpl(dao)
     }
 
     @Test
-    fun `deve buscar acoes pela fase correta` () = runTest {
+    fun `deve buscar acoes pela fase correta`() = runTest {
         every {
             dao.getByPhase(CyclePhase.MENSTRUAL.name)
         } returns flowOf(emptyList())
@@ -38,13 +39,14 @@ class CareActionRepositoryImplTest {
                 awaitItem()
                 awaitComplete()
             }
+
         verify {
             dao.getByPhase(CyclePhase.MENSTRUAL.name)
         }
     }
 
     @Test
-    fun `deve mapear a entidade do banco para dominio` () = runTest {
+    fun `deve mapear a entidade do banco para dominio`() = runTest {
         val entity = CareActionEntity(
             id = 100,
             title = "Minha ação",
@@ -62,12 +64,12 @@ class CareActionRepositoryImplTest {
                 val result = awaitItem()
 
                 val userAction = result.first {
-                    it.id.toInt() == 100
+                    it.id == 100L
                 }
 
                 assertEquals(100, userAction.id)
                 assertEquals("Minha ação", userAction.title)
-                assertEquals("Descrição",userAction.description)
+                assertEquals("Descrição", userAction.description)
                 assertEquals(CyclePhase.MENSTRUAL, userAction.phase)
                 assertTrue(userAction.isCompleted)
 
@@ -76,10 +78,10 @@ class CareActionRepositoryImplTest {
     }
 
     @Test
-    fun `deve retornar acoes padrao quando estiver vazio` () = runTest {
+    fun `deve retornar acoes padrao quando estiver vazio`() = runTest {
         every {
             dao.getByPhase(CyclePhase.MENSTRUAL.name)
-        }returns flowOf(emptyList())
+        } returns flowOf(emptyList())
 
         repository.getByPhase(CyclePhase.MENSTRUAL)
             .test {
@@ -88,23 +90,23 @@ class CareActionRepositoryImplTest {
                 assertEquals(6, result.size)
 
                 assertTrue(
-                    result.any{
-                        it.id.toInt() == 1 &&
-                        it.title == "Beber água quente"
+                    result.any {
+                        it.id == 1L &&
+                                it.title == "Beber água quente"
                     }
                 )
 
                 assertTrue(
                     result.any {
-                        it.id.toInt() == 2 &&
-                        it.title == "Descansar"
+                        it.id == 2L &&
+                                it.title == "Descansar"
                     }
                 )
 
                 assertTrue(
                     result.any {
-                        it.id.toInt() == 3 &&
-                        it.title == "Comer chocolate"
+                        it.id == 3L &&
+                                it.title == "Comer chocolate"
                     }
                 )
 
@@ -133,7 +135,7 @@ class CareActionRepositoryImplTest {
                 val result = awaitItem()
 
                 val action = result.first {
-                    it.id.toInt() == 1
+                    it.id == 1L
                 }
 
                 assertEquals("Beber água quente", action.title)
@@ -164,7 +166,7 @@ class CareActionRepositoryImplTest {
                 val result = awaitItem()
 
                 val userAction = result.first {
-                    it.id.toInt() == 999
+                    it.id == 999L
                 }
 
                 assertEquals("Minha rotina", userAction.title)
@@ -177,7 +179,13 @@ class CareActionRepositoryImplTest {
 
     @Test
     fun `deve salvar acao no banco de dados`() = runTest {
-        val action = CareAction(1, "Título", "Desc", CyclePhase.MENSTRUAL, false)
+        val action = CareAction(
+            1,
+            "Título",
+            "Desc",
+            CyclePhase.MENSTRUAL,
+            false
+        )
 
         coEvery { dao.insert(any()) } returns Unit
 
@@ -188,7 +196,13 @@ class CareActionRepositoryImplTest {
 
     @Test
     fun `deve atualizar acao no banco de dados`() = runTest {
-        val action = CareAction(1, "Título", "Desc", CyclePhase.MENSTRUAL, true)
+        val action = CareAction(
+            1,
+            "Título",
+            "Desc",
+            CyclePhase.MENSTRUAL,
+            true
+        )
 
         coEvery { dao.update(any()) } returns Unit
 
@@ -205,5 +219,4 @@ class CareActionRepositoryImplTest {
 
         coVerify { dao.resetAllCompletions() }
     }
-
 }
