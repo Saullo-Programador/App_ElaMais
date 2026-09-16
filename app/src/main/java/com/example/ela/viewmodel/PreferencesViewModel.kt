@@ -3,12 +3,14 @@ package com.example.ela.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.Preferences
+import com.example.ela.domain.usecase.notification.CancelNotificationsUseCase
 import com.example.ela.domain.usecase.preferences.GetPreferencesUseCase
 import com.example.ela.domain.usecase.preferences.SavePreferencesUseCase
 import com.example.ela.ui.screens.preferences.PreferencesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,6 +18,7 @@ import javax.inject.Inject
 class PreferencesViewModel @Inject constructor(
     private val getPreferencesUseCase: GetPreferencesUseCase,
     private val savePreferencesUseCase: SavePreferencesUseCase,
+    private val cancelNotificationsUseCase: CancelNotificationsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PreferencesUiState())
@@ -32,6 +35,13 @@ class PreferencesViewModel @Inject constructor(
 
     fun save(preferences: Preferences) {
         viewModelScope.launch {
+            val currentPrefs = getPreferencesUseCase().first()
+
+            // Se as notificações foram desativadas, cancelamos todas as agendadas
+            if (currentPrefs?.notificationsEnabled == true && !preferences.notificationsEnabled) {
+                cancelNotificationsUseCase.cancelAllNotifications()
+            }
+
             savePreferencesUseCase(preferences)
         }
     }

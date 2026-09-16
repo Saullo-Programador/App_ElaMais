@@ -4,14 +4,17 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.ela.domain.repository.PreferencesRepository
 import com.example.ela.notification.NotificationHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 
 @HiltWorker
 class NotificationWorker @AssistedInject constructor(
     @Assisted context: Context,
-    @Assisted params: WorkerParameters
+    @Assisted params: WorkerParameters,
+    private val preferencesRepository: PreferencesRepository
 ) : CoroutineWorker(context, params) {
 
     companion object {
@@ -23,6 +26,11 @@ class NotificationWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
+        val preferences = preferencesRepository.getPreferences().first()
+        if (preferences?.notificationsEnabled == false) {
+            return Result.success()
+        }
+
         val notificationId = inputData.getInt(KEY_NOTIFICATION_ID, 0)
         val title = inputData.getString(KEY_TITLE) ?: return Result.failure()
         val message = inputData.getString(KEY_MESSAGE) ?: return Result.failure()
