@@ -32,6 +32,7 @@ class CareActionViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        coEvery { initializeCareActionsUseCase(any()) } returns Unit
     }
 
     @After

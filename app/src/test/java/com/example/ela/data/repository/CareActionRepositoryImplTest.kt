@@ -204,7 +204,7 @@ class CareActionRepositoryImplTest {
             true
         )
 
-        coEvery { dao.update(any()) } returns Unit
+        coEvery { dao.update(any()) } returns 1
 
         repository.update(action)
 

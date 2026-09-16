@@ -71,19 +71,8 @@ class CareActionViewModel @Inject constructor(
      */
     fun toggleDone(action: CareAction) {
         viewModelScope.launch {
-
-            Log.d(
-                "CareAction",
-                "Checkbox clicado: ${action.title} | antes=${action.isCompleted}"
-            )
-
             val updated = action.copy(
                 isCompleted = !action.isCompleted
-            )
-
-            Log.d(
-                "CareAction",
-                "Novo estado: ${updated.isCompleted}"
             )
 
             updateCareActionUseCase(updated)

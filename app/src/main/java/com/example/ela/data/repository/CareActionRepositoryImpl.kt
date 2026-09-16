@@ -59,7 +59,19 @@ class CareActionRepositoryImpl(
     ): Flow<List<CareAction>> =
         dao.getByPhase(phase.name)
             .map { entities ->
-                entities.map { it.toDomain() }
+                val dbActions = entities.map { it.toDomain() }
+                val defaults = defaultActions[phase] ?: emptyList()
+
+                val result = defaults.toMutableList()
+                dbActions.forEach { dbAction ->
+                    val index = result.indexOfFirst { it.id == dbAction.id }
+                    if (index != -1) {
+                        result[index] = dbAction
+                    } else {
+                        result.add(dbAction)
+                    }
+                }
+                result
             }
 
     override suspend fun initializeDefaults(phase: CyclePhase) {
@@ -72,16 +84,7 @@ class CareActionRepositoryImpl(
 
     override suspend fun update(action: CareAction) {
         val entity = action.toEntity()
-
-        val rowsUpdated = dao.update(entity)
-
-        Log.d(
-            "CareAction",
-            "Update: id=${entity.id}, " +
-                    "title=${entity.title}, " +
-                    "isCompleted=${entity.isCompleted}, " +
-                    "rowsUpdated=$rowsUpdated"
-        )
+        dao.update(entity)
     }
 
     override suspend fun save(action: CareAction) {
