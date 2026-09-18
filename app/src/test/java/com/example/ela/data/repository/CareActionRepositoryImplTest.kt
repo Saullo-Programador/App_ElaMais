@@ -5,6 +5,8 @@ import com.example.ela.data.local.dao.CareActionDao
 import com.example.ela.data.local.entity.CareActionEntity
 import com.example.ela.domain.model.CareAction
 import com.example.ela.domain.model.CyclePhase
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -21,11 +23,21 @@ class CareActionRepositoryImplTest {
 
     private lateinit var dao: CareActionDao
     private lateinit var repository: CareActionRepositoryImpl
+    private lateinit var firebaseFirestore: FirebaseFirestore
+
 
     @Before
     fun setup() {
         dao = mockk()
-        repository = CareActionRepositoryImpl(dao)
+        firebaseFirestore = mockk()
+
+        val collection = mockk<CollectionReference>()
+
+        every {
+            firebaseFirestore.collection("care_actions")
+        } returns collection
+
+        repository = CareActionRepositoryImpl(dao, firebaseFirestore)
     }
 
     @Test

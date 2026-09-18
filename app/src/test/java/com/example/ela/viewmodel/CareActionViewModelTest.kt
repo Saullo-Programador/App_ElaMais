@@ -2,9 +2,12 @@ package com.example.ela.viewmodel
 
 import com.example.ela.domain.model.CareAction
 import com.example.ela.domain.model.CyclePhase
+import com.example.ela.domain.usecase.care.DeleteAllCareActionsUseCase
+import com.example.ela.domain.usecase.care.DeleteCareActionsUseCase
 import com.example.ela.domain.usecase.care.GetCareActionsByPhaseUseCase
 import com.example.ela.domain.usecase.care.InitializeCareActionsUseCase
 import com.example.ela.domain.usecase.care.SaveCareActionUseCase
+import com.example.ela.domain.usecase.care.SyncCareActionsUseCase
 import com.example.ela.domain.usecase.care.UpdateCareActionUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,6 +20,7 @@ import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CareActionViewModelTest {
@@ -24,7 +28,9 @@ class CareActionViewModelTest {
     private val getCareActionsByPhaseUseCase = mockk<GetCareActionsByPhaseUseCase>()
     private val updateCareActionUseCase = mockk<UpdateCareActionUseCase>()
     private val saveCareActionUseCase = mockk<SaveCareActionUseCase>()
-
+    private val deleteCareActionsUseCase = mockk<DeleteCareActionsUseCase>()
+    private val deleteAllCareActionsUseCase = mockk<DeleteAllCareActionsUseCase>()
+    private val syncCareActionsUseCase = mockk<SyncCareActionsUseCase>()
     private val initializeCareActionsUseCase = mockk<InitializeCareActionsUseCase>()
 
     private val testDispatcher = StandardTestDispatcher()
@@ -32,6 +38,7 @@ class CareActionViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        coEvery { syncCareActionsUseCase() } returns Unit
         coEvery { initializeCareActionsUseCase(any()) } returns Unit
     }
 
@@ -56,7 +63,10 @@ class CareActionViewModelTest {
             getCareActionsByPhaseUseCase,
             updateCareActionUseCase,
             saveCareActionUseCase,
-            initializeCareActionsUseCase
+            deleteCareActionsUseCase,
+            deleteAllCareActionsUseCase,
+            initializeCareActionsUseCase,
+            syncCareActionsUseCase
         )
 
         // Ação
@@ -85,7 +95,10 @@ class CareActionViewModelTest {
             getCareActionsByPhaseUseCase,
             updateCareActionUseCase,
             saveCareActionUseCase,
+            deleteCareActionsUseCase,
+            deleteAllCareActionsUseCase,
             initializeCareActionsUseCase,
+            syncCareActionsUseCase
         )
 
         // Ação
@@ -112,7 +125,10 @@ class CareActionViewModelTest {
             getCareActionsByPhaseUseCase,
             updateCareActionUseCase,
             saveCareActionUseCase,
-            initializeCareActionsUseCase
+            deleteCareActionsUseCase,
+            deleteAllCareActionsUseCase,
+            initializeCareActionsUseCase,
+            syncCareActionsUseCase
         )
 
         // Ação
@@ -124,11 +140,5 @@ class CareActionViewModelTest {
         assertEquals(actions, state.actions)
         assertEquals(phase, state.phase)
         assertEquals(false, state.isLoading)
-    }
-
-    private fun <T> assertEquals(expected: T, actual: T) {
-        if (expected != actual) {
-            throw AssertionError("Expected $expected but was $actual")
-        }
     }
 }
