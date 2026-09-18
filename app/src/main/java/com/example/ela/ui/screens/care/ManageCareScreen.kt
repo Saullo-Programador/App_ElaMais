@@ -1,6 +1,7 @@
 package com.example.ela.ui.screens.care
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -41,8 +42,15 @@ fun ManageCareScreen(
     val state by viewModel.state.collectAsState()
     var showEditor by remember { mutableStateOf(false) }
     var editingAction by remember { mutableStateOf<CareAction?>(null) }
+    var showDeleteAllConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
+        topBar = {
+            ManageCareTopBar(
+                onBack = onBack,
+                onDeleteAllClick = { showDeleteAllConfirm = true }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -60,7 +68,6 @@ fun ManageCareScreen(
             ManageCareScreenContent(
                 state = state,
                 onDelete = { action -> viewModel.delete(action.id) },
-                onDeleteAll = { viewModel.deleteAll() },
                 onEdit = { action ->
                     editingAction = action
                     showEditor = true
@@ -69,6 +76,29 @@ fun ManageCareScreen(
                 viewModel = viewModel,
                 onBack = onBack
             )
+            if (showDeleteAllConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteAllConfirm = false },
+                    title = { Text("Deletar Todos") },
+                    text = { Text("Tem certeza que deseja remover todos os cuidados cadastrados? Esta ação não pode ser desfeita.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteAll()
+                                showDeleteAllConfirm = false
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("Deletar Tudo")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteAllConfirm = false }) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
 
             if (showEditor) {
                 CareActionEditorBottomSheet(
@@ -89,10 +119,59 @@ fun ManageCareScreen(
 }
 
 @Composable
+fun ManageCareTopBar(
+    onBack: () -> Unit,
+    onDeleteAllClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+                onClick = onBack,
+                colors = IconButtonDefaults.iconButtonColors(
+                    MaterialTheme.colorScheme.background
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Gerenciar Cuidados",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+
+        IconButton(
+            onClick = onDeleteAllClick,
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = "Deletar Todos",
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
 fun ManageCareScreenContent(
     state: CareActionUiState,
     onDelete: (CareAction) -> Unit,
-    onDeleteAll: () -> Unit,
     onEdit: (CareAction) -> Unit,
     actions: List<CareAction>,
     onBack: () -> Unit,
@@ -106,7 +185,6 @@ fun ManageCareScreenContent(
                 actions = actions,
                 onDelete = onDelete,
                 onEdit = onEdit,
-                onDeleteAll = onDeleteAll,
                 onBack = onBack
             )
         }
@@ -118,60 +196,16 @@ fun ManageCareContent(
     actions: List<CareAction>,
     onDelete: (CareAction) -> Unit = {},
     onEdit: (CareAction) -> Unit = {},
-    onDeleteAll: () -> Unit = {},
     onBack: () -> Unit = {}
 ){
     val phases = CyclePhase.entries
-    var showDeleteAllConfirm by remember { mutableStateOf(false) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, 24.dp),
+                .padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onBack,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            MaterialTheme.colorScheme.background
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Gerenciar Cuidados",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-
-                IconButton(
-                    onClick = { showDeleteAllConfirm = true },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Deletar Todos",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             LazyColumn(
@@ -193,30 +227,6 @@ fun ManageCareContent(
             }
         }
     }
-
-    if (showDeleteAllConfirm) {
-        AlertDialog(
-            onDismissRequest = { showDeleteAllConfirm = false },
-            title = { Text("Deletar Todos") },
-            text = { Text("Tem certeza que deseja remover todos os cuidados cadastrados? Esta ação não pode ser desfeita.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDeleteAll()
-                        showDeleteAllConfirm = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Deletar Tudo")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteAllConfirm = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
 }
 
 @Composable
@@ -235,7 +245,9 @@ fun CareDropdown(
             Icons.Default.ArrowDropDown
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = {expanded = !expanded}),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(0.3f)),
         elevation = CardDefaults.cardElevation(
@@ -527,7 +539,6 @@ fun PreviewManegeCareScreen() {
             ),
             onDelete = {},
             onEdit = {},
-            onDeleteAll = {}
         )
     }
 }

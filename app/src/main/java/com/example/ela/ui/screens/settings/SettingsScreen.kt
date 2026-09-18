@@ -406,7 +406,7 @@ fun SettingsContent(
                 )
 
                 SettingClickableItem(
-                    icon = Icons.Default.Tune,
+                    icon = Icons.Default.Favorite,
                     title = "Cuidados",
                     description = "Gerenciar os cuidados",
                     onClick = onClickManegeCare
