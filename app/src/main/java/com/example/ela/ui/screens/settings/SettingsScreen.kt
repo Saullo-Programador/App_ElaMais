@@ -52,9 +52,14 @@ fun SettingsScreen(
         onToggleDarkMode = {
             viewModel.toggleDarkMode(it)
         },
+        onConfirmDeleteClick = {
+            viewModel.onConfirmDeleteDataClick()
+        },
+        onDismissDeleteConfirmation = {
+            viewModel.onDismissDeleteConfirmation()
+        },
         onClickPreferences = onClickPreferences,
         onClickManegeCare = onClickManegeCare
-
     )
 }
 
@@ -69,16 +74,13 @@ fun SettingsContent(
     onClearAllData: () -> Unit = {},
     onDismissSuccess: () -> Unit = {},
     onDismissError: () -> Unit = {},
+    onConfirmDeleteClick: () -> Unit = {},
+    onDismissDeleteConfirmation: () -> Unit = {},
     onClickPreferences: () -> Unit = {},
     onClickManegeCare: () -> Unit = {}
 ) {
 
     val scrollState = rememberScrollState()
-
-    // Controle do Dialog de confirmação
-    var showClearDataDialog by remember {
-        mutableStateOf(false)
-    }
 
     // Controle do Snackbar
     val snackbarHostState = remember {
@@ -128,12 +130,12 @@ fun SettingsContent(
      * Esse Dialog permanece porque apagar dados é uma ação
      * importante e potencialmente irreversível.
      */
-    if (showClearDataDialog) {
+    if (uiState.showDeleteConfirmation) {
 
         AlertDialog(
 
             onDismissRequest = {
-                showClearDataDialog = false
+                onDismissDeleteConfirmation()
             },
 
             title = {
@@ -153,7 +155,7 @@ fun SettingsContent(
 
                     onClick = {
 
-                        showClearDataDialog = false
+                        onDismissDeleteConfirmation()
 
                         onClearAllData()
                     },
@@ -171,7 +173,7 @@ fun SettingsContent(
 
                 TextButton(
                     onClick = {
-                        showClearDataDialog = false
+                        onDismissDeleteConfirmation()
                     }
                 ) {
                     Text("Cancelar")
@@ -419,7 +421,7 @@ fun SettingsContent(
                     title = "Limpar dados",
                     description = "Apagar histórico e informações salvas",
                     onClick = {
-                        showClearDataDialog = true
+                        onConfirmDeleteClick()
                     }
                 )
 

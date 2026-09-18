@@ -166,4 +166,16 @@ class SettingsViewModel @Inject constructor(
             it.copy(errorMessage = null)
         }
     }
+
+    fun onConfirmDeleteDataClick() {
+        _uiState.update {
+            it.copy(showDeleteConfirmation = true)
+        }
+    }
+
+    fun onDismissDeleteConfirmation() {
+        _uiState.update {
+            it.copy(showDeleteConfirmation = false)
+        }
+    }
 }

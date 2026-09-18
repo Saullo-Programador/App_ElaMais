@@ -27,4 +27,8 @@ class CycleRecordRepositoryImpl(
     override suspend fun delete(record: CycleRecord) {
         dao.delete(record.toEntity())
     }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+    }
 }

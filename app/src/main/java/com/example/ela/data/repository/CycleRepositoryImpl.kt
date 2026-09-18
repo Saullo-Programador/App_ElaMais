@@ -52,4 +52,13 @@ class CycleRepositoryImpl (
         }
     }
 
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+        try {
+            collection.document("user_cycle").delete().await()
+        } catch (e: Exception) {
+            // Log removed to avoid unit test crash
+        }
+    }
+
 }

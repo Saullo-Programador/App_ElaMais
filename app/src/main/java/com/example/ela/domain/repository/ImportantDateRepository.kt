@@ -13,4 +13,6 @@ interface ImportantDateRepository {
 
     suspend fun syncDates()
 
+    suspend fun deleteAll()
+
 }

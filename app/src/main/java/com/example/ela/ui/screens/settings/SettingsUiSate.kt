@@ -7,6 +7,7 @@ data class SettingsUiState(
     val isLoading: Boolean = false,
     val isClearingData: Boolean = false,
     val dataClearedSuccess: Boolean = false,
+    val showDeleteConfirmation: Boolean = false,
     val errorMessage: String? = null
 )
 

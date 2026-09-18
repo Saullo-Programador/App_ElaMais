@@ -79,4 +79,16 @@ class ImportantDateRepositoryImpl(
             )
         }
     }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+        try {
+            val snapshot = collection.get().await()
+            snapshot.documents.forEach { doc ->
+                collection.document(doc.id).delete().await()
+            }
+        } catch (e: Exception) {
+            Log.e("ImportantDateRepository", "Erro ao deletar todas as datas importantes no Firebase", e)
+        }
+    }
 }

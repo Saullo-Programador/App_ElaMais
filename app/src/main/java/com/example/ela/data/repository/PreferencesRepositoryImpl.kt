@@ -66,4 +66,13 @@ class PreferencesRepositoryImpl(
         savePreferences(updated)
     }
 
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+        try {
+            collection.document("user_preferences").delete().await()
+        } catch (e: Exception) {
+            Log.e("PreferencesRepository", "Erro ao deletar preferências no Firebase", e)
+        }
+    }
+
 }

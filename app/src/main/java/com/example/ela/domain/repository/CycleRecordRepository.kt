@@ -10,4 +10,6 @@ interface CycleRecordRepository {
     suspend fun save(record: CycleRecord)
 
     suspend fun delete(record: CycleRecord)
+
+    suspend fun deleteAll()
 }

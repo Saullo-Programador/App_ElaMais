@@ -12,6 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.ui.screens.care.CareScreen
@@ -31,11 +32,20 @@ fun MainScreen() {
     val homeState by homeViewModel.state.collectAsState()
     val currentPhase = homeState.cycleInfo?.currentPhase ?: CyclePhase.FOLLICULAR
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val showBottomBar = currentRoute != Screen.Settings.route &&
+                        currentRoute != Screen.Preferences.route &&
+                        currentRoute != Screen.ManageCare.route
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier,
         bottomBar = {
-            BottomBar(navController, currentPhase)
+            if (showBottomBar) {
+                BottomBar(navController, currentPhase)
+            }
         }
     ) { padding ->
 

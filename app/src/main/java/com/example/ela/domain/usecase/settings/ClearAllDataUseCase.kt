@@ -1,28 +1,28 @@
 package com.example.ela.domain.usecase.settings
 
-import com.example.ela.data.local.dao.CareActionDao
-import com.example.ela.data.local.dao.CycleDao
-import com.example.ela.data.local.dao.CycleRecordDao
-import com.example.ela.data.local.dao.ImportantDateDao
-import com.example.ela.data.local.dao.PreferencesDao
-import com.example.ela.data.local.dao.ReminderDao
+import com.example.ela.domain.repository.CareActionRepository
+import com.example.ela.domain.repository.CycleRepository
+import com.example.ela.domain.repository.CycleRecordRepository
+import com.example.ela.domain.repository.ImportantDateRepository
+import com.example.ela.domain.repository.PreferencesRepository
+import com.example.ela.domain.repository.ReminderRepository
 import javax.inject.Inject
 
 class ClearAllDataUseCase @Inject constructor(
-    private val cycleDao: CycleDao,
-    private val careActionDao: CareActionDao,
-    private val importantDateDao: ImportantDateDao,
-    private val reminderDao: ReminderDao,
-    private val cycleRecordDao: CycleRecordDao,
-    private val preferencesDao: PreferencesDao
+    private val cycleRepository: CycleRepository,
+    private val careActionRepository: CareActionRepository,
+    private val importantDateRepository: ImportantDateRepository,
+    private val reminderRepository: ReminderRepository,
+    private val cycleRecordRepository: CycleRecordRepository,
+    private val preferencesRepository: PreferencesRepository
 ) {
 
     suspend operator fun invoke() {
-        cycleDao.deleteAll()
-        careActionDao.deleteAll()
-        importantDateDao.deleteAll()
-        reminderDao.deleteAll()
-        cycleRecordDao.deleteAll()
-        preferencesDao.deleteAll()
+        cycleRepository.deleteAll()
+        careActionRepository.deleteAll()
+        importantDateRepository.deleteAll()
+        reminderRepository.deleteAll()
+        cycleRecordRepository.deleteAll()
+        preferencesRepository.deleteAll()
     }
 }

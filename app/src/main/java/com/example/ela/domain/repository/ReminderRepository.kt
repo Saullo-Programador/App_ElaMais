@@ -11,4 +11,6 @@ interface ReminderRepository {
     suspend fun deleteReminder(reminder: Reminder)
 
     suspend fun syncReminder()
+
+    suspend fun deleteAll()
 }

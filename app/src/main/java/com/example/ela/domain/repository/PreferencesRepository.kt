@@ -12,4 +12,6 @@ interface PreferencesRepository {
     suspend fun syncPreferences()
 
     suspend fun updateDarkMode(isDarkMode: Boolean)
+
+    suspend fun deleteAll()
 }

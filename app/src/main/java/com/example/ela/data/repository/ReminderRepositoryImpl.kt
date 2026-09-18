@@ -79,4 +79,15 @@ class ReminderRepositoryImpl (
         }
     }
 
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+        try {
+            val snapshot = collection.get().await()
+            snapshot.documents.forEach { doc ->
+                collection.document(doc.id).delete().await()
+            }
+        } catch (e: Exception) {
+            Log.e("ReminderRepository", "Erro ao deletar todos os lembretes no Firebase", e)
+        }
+    }
 }

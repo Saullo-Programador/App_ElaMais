@@ -9,4 +9,6 @@ interface CycleRepository {
     suspend fun saveCycle(cycle: Cycle)
 
     suspend fun syncCycle()
+
+    suspend fun deleteAll()
 }
