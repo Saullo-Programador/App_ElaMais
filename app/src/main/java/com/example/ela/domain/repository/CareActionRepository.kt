@@ -12,7 +12,13 @@ interface CareActionRepository {
 
     suspend fun save(action: CareAction)
 
+    suspend fun deleteById(id: Long)
+
+    suspend fun deleteAll()
+
     suspend fun resetCompletedActions()
 
     suspend fun initializeDefaults(phase: CyclePhase)
+
+    suspend fun syncCareActions()
 }

@@ -24,7 +24,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onClickPreferences: () -> Unit
+    onClickPreferences: () -> Unit,
+    onClickManegeCare: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -51,7 +52,8 @@ fun SettingsScreen(
         onToggleDarkMode = {
             viewModel.toggleDarkMode(it)
         },
-        onClickPreferences = onClickPreferences
+        onClickPreferences = onClickPreferences,
+        onClickManegeCare = onClickManegeCare
 
     )
 }
@@ -67,7 +69,8 @@ fun SettingsContent(
     onClearAllData: () -> Unit = {},
     onDismissSuccess: () -> Unit = {},
     onDismissError: () -> Unit = {},
-    onClickPreferences: () -> Unit = {}
+    onClickPreferences: () -> Unit = {},
+    onClickManegeCare: () -> Unit = {}
 ) {
 
     val scrollState = rememberScrollState()
@@ -402,6 +405,12 @@ fun SettingsContent(
                     }
                 )
 
+                SettingClickableItem(
+                    icon = Icons.Default.Tune,
+                    title = "Cuidados",
+                    description = "Gerenciar os cuidados",
+                    onClick = onClickManegeCare
+                )
 
                 // Limpar dados
 

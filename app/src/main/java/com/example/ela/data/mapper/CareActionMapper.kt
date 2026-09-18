@@ -28,7 +28,7 @@ fun CareAction.toEntity(): CareActionEntity {
 
 fun CareActionDto.toDomain(): CareAction {
     return CareAction(
-        id = id.hashCode().toLong(),
+        id = id.toLongOrNull() ?: 0L,
         title = title,
         description = description,
         phase = CyclePhase.valueOf(phase),

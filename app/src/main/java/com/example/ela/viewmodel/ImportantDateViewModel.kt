@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.model.ImportantDate
 import com.example.ela.domain.usecase.important_date.GetImportantDatesUseCase
 import com.example.ela.domain.usecase.important_date.SaveImportantDateUseCase
+import com.example.ela.domain.usecase.important_date.SyncImportantDatesUseCase
 import com.example.ela.domain.usecase.notification.ScheduleImportantDateNotificationUseCase
 import com.example.ela.ui.screens.importantDate.ImportantDateUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class ImportantDateViewModel @Inject constructor(
     private val getImportantDatesUseCase: GetImportantDatesUseCase,
     private val saveImportantDateUseCase: SaveImportantDateUseCase,
-    private val scheduleImportantDateNotificationUseCase: ScheduleImportantDateNotificationUseCase
+    private val scheduleImportantDateNotificationUseCase: ScheduleImportantDateNotificationUseCase,
+    private val syncImportantDatesUseCase: SyncImportantDatesUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ImportantDateUiState())
@@ -25,6 +27,7 @@ class ImportantDateViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            syncImportantDatesUseCase()
             getImportantDatesUseCase().collect {
                 _state.value = ImportantDateUiState(it)
             }

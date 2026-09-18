@@ -26,6 +26,11 @@ interface CareActionDao {
     @Query("UPDATE care_actions SET isCompleted = 0")
     suspend fun resetAllCompletions()
 
+    // Apaga TODAS as ações
     @Query("DELETE FROM care_actions")
     suspend fun deleteAll()
+
+    // Apaga somente uma ação
+    @Query("DELETE FROM care_actions WHERE id= :id ")
+    suspend fun deleteById(id: Long): Int
 }

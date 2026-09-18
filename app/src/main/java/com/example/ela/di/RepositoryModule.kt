@@ -61,6 +61,7 @@ object RepositoryModule {
 
     @Provides
     fun provideCareActionRepository(
-        dao: com.example.ela.data.local.dao.CareActionDao
-    ): CareActionRepository = CareActionRepositoryImpl(dao)
+        dao: com.example.ela.data.local.dao.CareActionDao,
+        firestore: FirebaseFirestore
+    ): CareActionRepository = CareActionRepositoryImpl(dao, firestore)
 }

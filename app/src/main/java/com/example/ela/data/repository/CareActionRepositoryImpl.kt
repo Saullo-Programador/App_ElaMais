@@ -4,14 +4,20 @@ import android.util.Log
 import com.example.ela.data.local.dao.CareActionDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toEntity
+import com.example.ela.data.mapper.toDto
 import com.example.ela.domain.model.CareAction
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.domain.repository.CareActionRepository
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.tasks.await
 
 class CareActionRepositoryImpl(
-    private val dao: CareActionDao
+    private val dao: CareActionDao,
+    private val firestore: FirebaseFirestore
 ) : CareActionRepository {
+
+    private val collection = firestore.collection("care_actions")
 
     // Dados mockados para teste (Dicas padrão)
     private val defaultActions = mapOf(
@@ -83,15 +89,74 @@ class CareActionRepositoryImpl(
     }
 
     override suspend fun update(action: CareAction) {
-        val entity = action.toEntity()
-        dao.update(entity)
+        // 🔹 Salva local primeiro
+        dao.update(action.toEntity())
+        // 🔹 Tenta atualizar no Firebase
+        try {
+            collection.document(action.id.toString())
+                .set(action.toDto())
+                .await()
+        } catch (e: Exception) {
+            Log.e("CareActionRepository", "Erro ao atualizar cuidado no Firebase", e)
+        }
     }
 
     override suspend fun save(action: CareAction) {
+        // 🔹 Salva local primeiro
         dao.insert(action.toEntity())
+        // 🔹 Tenta salvar no Firebase
+        try {
+            collection.document(action.id.toString())
+                .set(action.toDto())
+                .await()
+        } catch (e: Exception) {
+            Log.e("CareActionRepository", "Erro ao salvar cuidado no Firebase", e)
+        }
+    }
+
+    override suspend fun deleteById(id: Long){
+        // 🔹 Deleta local primeiro
+        dao.deleteById(id)
+        // 🔹 Tenta deletar no Firebase
+        try {
+            collection.document(id.toString())
+                .delete()
+                .await()
+        } catch (e: Exception) {
+            Log.e("CareActionRepository", "Erro ao deletar cuidado no Firebase", e)
+        }
+    }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+        // Since we can't easily delete all documents in Firestore without a batch
+        // or querying them all, we'll fetch and delete.
+        try {
+            val snapshot = collection.get().await()
+            snapshot.documents.forEach { doc ->
+                collection.document(doc.id).delete().await()
+            }
+        } catch (e: Exception) {
+            Log.e("CareActionRepository", "Erro ao deletar todos os cuidados no Firebase", e)
+        }
     }
 
     override suspend fun resetCompletedActions() {
         dao.resetAllCompletions()
+    }
+
+    override suspend fun syncCareActions() {
+        try {
+            val snapshot = collection.get().await()
+            val list = snapshot.documents.mapNotNull {
+                it.toObject(com.example.ela.data.remote.dto.CareActionDto::class.java)
+            }
+
+            list.forEach { dto ->
+                dao.insert(dto.toDomain().toEntity())
+            }
+        } catch (e: Exception) {
+            Log.e("CareActionRepository", "Erro ao sincronizar cuidados do Firebase", e)
+        }
     }
 }

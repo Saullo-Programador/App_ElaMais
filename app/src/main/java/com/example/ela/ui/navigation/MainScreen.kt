@@ -15,6 +15,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.ui.screens.care.CareScreen
+import com.example.ela.ui.screens.care.ManageCareScreen
 import com.example.ela.ui.screens.cycle.CycleScreen
 import com.example.ela.ui.screens.home.HomeScreen
 import com.example.ela.ui.screens.preferences.PreferencesScreen
@@ -97,12 +98,23 @@ fun MainScreen() {
                 SettingsScreen(
                     onClickPreferences = {
                         navController.navigate(Screen.Preferences.route)
+                    },
+                    onClickManegeCare = {
+                        navController.navigate(Screen.ManageCare.route)
                     }
                 )
             }
 
             composable(Screen.Preferences.route) {
-                PreferencesScreen()
+                PreferencesScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.ManageCare.route) {
+                ManageCareScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }

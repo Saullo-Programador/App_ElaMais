@@ -7,5 +7,6 @@ data class CareActionUiState(
     val isLoading: Boolean = false,
     val actions: List<CareAction> = emptyList(),
     val phase: CyclePhase? = null,
+    val success: String? = null,
     val error: String? = null
 )

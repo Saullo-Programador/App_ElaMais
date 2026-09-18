@@ -21,4 +21,6 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     @Serializable
     object Preferences : Screen("preferences")
+    @Serializable
+    object ManageCare : Screen("manege_care")
 }
