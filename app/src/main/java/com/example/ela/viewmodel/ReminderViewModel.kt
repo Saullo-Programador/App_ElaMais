@@ -40,13 +40,42 @@ class ReminderViewModel @Inject constructor(
 
     fun save(reminder: Reminder) {
         viewModelScope.launch {
-            saveReminderUseCase(reminder)
+            try {
+                saveReminderUseCase(reminder)
+                _state.value = _state.value.copy(
+                    success = "Lembrete salvo com sucesso! 🔔",
+                    error = null
+                )
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = e.message ?: "Erro ao salvar lembrete",
+                    success = null
+                )
+            }
         }
     }
 
     fun delete(reminder: Reminder){
         viewModelScope.launch {
-            deleteReminderUseCase(reminder)
+            try {
+                deleteReminderUseCase(reminder)
+                _state.value = _state.value.copy(
+                    success = "Lembrete removido com sucesso! 🗑️",
+                    error = null
+                )
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = e.message ?: "Erro ao deletar lembrete",
+                    success = null
+                )
+            }
         }
+    }
+
+    fun clearMessage() {
+        _state.value = _state.value.copy(
+            success = null,
+            error = null
+        )
     }
 }

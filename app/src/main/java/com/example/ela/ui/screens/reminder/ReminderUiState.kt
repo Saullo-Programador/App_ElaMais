@@ -4,5 +4,7 @@ import com.example.ela.domain.model.Reminder
 
 data class ReminderUiState(
     val reminders: List<Reminder> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val success: String? = null,
+    val error: String? = null
 )

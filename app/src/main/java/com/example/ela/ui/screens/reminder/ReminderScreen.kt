@@ -29,6 +29,7 @@ import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.ElaTheme
 import com.example.ela.ui.theme.Rose600
 import com.example.ela.viewmodel.ReminderViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,9 +38,27 @@ fun ReminderScreen(
     viewModel: ReminderViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(state.success, state.error) {
+        state.success?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(message = it)
+                viewModel.clearMessage()
+            }
+        }
+        state.error?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(message = it)
+                viewModel.clearMessage()
+            }
+        }
+    }
 
     ReminderContent(
         state = state,
+        snackbarHostState = snackbarHostState,
         onSave = { reminder ->
             viewModel.save(reminder)
         },
@@ -53,6 +72,7 @@ fun ReminderScreen(
 @Composable
 fun ReminderContent(
     state: ReminderUiState,
+    snackbarHostState: SnackbarHostState,
     onSave: (Reminder) -> Unit,
     onDelete: (Reminder) -> Unit
 ) {
@@ -66,7 +86,8 @@ fun ReminderContent(
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Adicionar lembrete", tint = Color.White)
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -462,7 +483,8 @@ fun ReminderScreenPreview() {
                 )
             ),
             onSave = {},
-            onDelete = {}
+            onDelete = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }

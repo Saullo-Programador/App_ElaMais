@@ -58,7 +58,7 @@ class CycleViewModelTest {
 
         coVerify { saveCycleUseCase(cycle) }
         coVerify { scheduleCycleNotificationsUseCase(any(), any(), any()) }
-        assertTrue(viewModel.state.value.success)
+        assertEquals("Configurações de ciclo salvas com sucesso! ✨", viewModel.state.value.success)
     }
 
     @Test

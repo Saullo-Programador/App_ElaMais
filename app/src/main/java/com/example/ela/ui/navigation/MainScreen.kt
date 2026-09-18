@@ -35,8 +35,7 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomBar = currentRoute != Screen.Settings.route &&
-                        currentRoute != Screen.Preferences.route &&
+    val showBottomBar = currentRoute != Screen.Preferences.route &&
                         currentRoute != Screen.ManageCare.route
 
     Scaffold(

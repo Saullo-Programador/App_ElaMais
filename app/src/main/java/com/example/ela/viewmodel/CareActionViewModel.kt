@@ -89,9 +89,14 @@ class CareActionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 saveCareActionUseCase(action)
+                _state.value = _state.value.copy(
+                    success = "Cuidado salvo com sucesso! ✨",
+                    error = null
+                )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    error = e.message ?: "Erro ao Salvar cuidado"
+                    error = e.message ?: "Erro ao Salvar cuidado",
+                    success = null
                 )
             }
         }
@@ -101,9 +106,14 @@ class CareActionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 updateCareActionUseCase(action)
+                _state.value = _state.value.copy(
+                    success = "Cuidado atualizado com sucesso! ✅",
+                    error = null
+                )
             } catch (e: Exception){
                 _state.value = _state.value.copy(
-                    error = e.message ?: "Erro ao Editar Cuidado"
+                    error = e.message ?: "Erro ao Editar Cuidado",
+                    success = null
                 )
             }
         }
@@ -113,9 +123,14 @@ class CareActionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteCareActionsUseCase(id)
+                _state.value = _state.value.copy(
+                    success = "Cuidado removido com sucesso! 🗑️",
+                    error = null
+                )
             }catch (e: Exception){
                 _state.value = _state.value.copy(
-                    error = e.message ?: "Erro ao Deletar Cuidado"
+                    error = e.message ?: "Erro ao Deletar Cuidado",
+                    success = null
                 )
             }
         }
@@ -125,11 +140,23 @@ class CareActionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteAllCareActionsUseCase()
+                _state.value = _state.value.copy(
+                    success = "Todos os cuidados foram removidos! 🧹",
+                    error = null
+                )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    error = e.message ?: "Erro ao Deletar Todos os Cuidados"
+                    error = e.message ?: "Erro ao Deletar Todos os Cuidados",
+                    success = null
                 )
             }
         }
+    }
+
+    fun clearMessage() {
+        _state.value = _state.value.copy(
+            success = null,
+            error = null
+        )
     }
 }

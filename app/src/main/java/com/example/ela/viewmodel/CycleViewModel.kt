@@ -57,7 +57,7 @@ class CycleViewModel @Inject constructor(
 
                 _state.value = _state.value.copy(
                     isSaving = false,
-                    success = true
+                    success = "Configurações de ciclo salvas com sucesso! ✨"
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -66,5 +66,12 @@ class CycleViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun clearMessage() {
+        _state.value = _state.value.copy(
+            success = null,
+            error = null
+        )
     }
 }

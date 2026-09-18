@@ -33,6 +33,7 @@ import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.*
 import com.example.ela.viewmodel.CareActionViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ManageCareScreen(
@@ -44,6 +45,24 @@ fun ManageCareScreen(
     var editingAction by remember { mutableStateOf<CareAction?>(null) }
     var showDeleteAllConfirm by remember { mutableStateOf(false) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(state.success, state.error) {
+        state.success?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(message = it)
+                viewModel.clearMessage()
+            }
+        }
+        state.error?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(message = it)
+                viewModel.clearMessage()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             ManageCareTopBar(
@@ -51,6 +70,7 @@ fun ManageCareScreen(
                 onDeleteAllClick = { showDeleteAllConfirm = true }
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {

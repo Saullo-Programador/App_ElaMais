@@ -23,6 +23,7 @@ import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
 import com.example.ela.ui.theme.ElaTheme
 import com.example.ela.viewmodel.CycleViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,13 +32,39 @@ fun CycleScreen(
     viewModel: CycleViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    CycleContent(
-        state = state,
-        onSave = { cycle ->
-            viewModel.saveCycle(cycle)
+    LaunchedEffect(state.success, state.error) {
+        state.success?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(message = it)
+                viewModel.clearMessage()
+            }
         }
-    )
+        state.error?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(message = it)
+                viewModel.clearMessage()
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            CycleContent(
+                state = state,
+                onSave = { cycle ->
+                    viewModel.saveCycle(cycle)
+                }
+            )
+            if (state.isSaving) {
+                LoadingView()
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,16 +117,6 @@ fun CycleContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        when {
-            state.isSaving -> LoadingView()
-            state.error != null -> ErrorView(
-                message = state.error
-            )
-            state.success -> {
-                SuccessView()
-            }
-        }
 
         // Ciclo Length
 
@@ -240,29 +257,6 @@ fun CycleContent(
                 colors = DatePickerDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
-            )
-        }
-    }
-}
-
-@Composable
-fun SuccessView() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "✓ Configurações salvas com sucesso!",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

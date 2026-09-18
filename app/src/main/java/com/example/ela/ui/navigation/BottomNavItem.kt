@@ -2,6 +2,7 @@ package com.example.ela.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
@@ -17,7 +18,7 @@ data class BottomNavItem(
 val bottomNavItems = listOf(
     BottomNavItem(
         label = "Home",
-        icon = Icons.Outlined.Home,
+        icon = Icons.Outlined.Dashboard,
         route = Screen.Home.route
     ),
 
