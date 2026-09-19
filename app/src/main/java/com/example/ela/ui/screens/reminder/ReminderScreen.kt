@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.room.util.query
 import com.example.ela.domain.model.ImportantDate
 import com.example.ela.domain.model.Reminder
 import com.example.ela.ui.components.ButtonComponent
@@ -93,6 +95,12 @@ fun ReminderScreen(
         },
         onDelete = { reminder ->
             viewModel.delete(reminder)
+        },
+        onChangeSearch = { query ->
+            viewModel.onSearchQueryChange(query)
+        },
+        onClickFilter = { type ->
+            viewModel.onFilterTypeChange(type)
         }
     )
 }
@@ -104,7 +112,9 @@ fun ReminderContent(
     snackbarHostState: SnackbarHostState,
     onSaveReminder: (Reminder) -> Unit,
     onSaveImportantDate: (ImportantDate) -> Unit,
-    onDelete: (Reminder) -> Unit
+    onDelete: (Reminder) -> Unit,
+    onClickFilter: (ReminderFilterType) -> Unit,
+    onChangeSearch: (String) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -141,12 +151,42 @@ fun ReminderContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            InputComponent(
+                value = state.searchQuery,
+                onValueChange = onChangeSearch,
+                label = "Pesquisar lembretes...",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ReminderFilterType.values().forEach { type ->
+                    FilterChip(
+                        selected = state.filterType == type,
+                        onClick = {onClickFilter(type)},
+                        label = {
+                            Text(
+                                text = when (type) {
+                                    ReminderFilterType.ALL -> "Todos"
+                                    ReminderFilterType.REMINDERS -> "Lembretes"
+                                    ReminderFilterType.SPECIAL_DATES -> "Datas Especiais"
+                                },
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             when {
                 state.isLoading -> LoadingView()
-                state.reminders.isEmpty() && state.importantDates.isEmpty() -> EmptyRemindersView()
+                state.filteredEvents.isEmpty() -> EmptyRemindersView()
                 else -> RemindersList(
-                    reminders = state.reminders,
-                    importantDates = state.importantDates,
+                    events = state.filteredEvents,
                     onDelete = onDelete
                 )
             }
@@ -170,26 +210,16 @@ fun ReminderContent(
 
 @Composable
 fun RemindersList(
-    reminders: List<Reminder>,
-    importantDates: List<ImportantDate>,
+    events: List<TimelineItem>,
     onDelete: (Reminder) -> Unit
 ) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
-    val combinedEvents = (reminders.map { TimelineItem.HealthReminder(it) } +
-                          importantDates.map { TimelineItem.SpecialDate(it) })
-        .sortedBy {
-            when(it) {
-                is TimelineItem.HealthReminder -> it.reminder.date
-                is TimelineItem.SpecialDate -> it.date.date
-            }
-        }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(combinedEvents) { event ->
+        items(events) { event ->
             when (event) {
                 is TimelineItem.HealthReminder -> {
                     ReminderCard(
@@ -303,7 +333,7 @@ fun ReminderCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -706,6 +736,8 @@ fun ReminderScreenPreview() {
             onSaveImportantDate = {},
             onDelete = {},
             snackbarHostState = SnackbarHostState(),
+            onClickFilter = {},
+            onChangeSearch = {},
         )
     }
 }

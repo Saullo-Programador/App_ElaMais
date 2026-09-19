@@ -9,7 +9,9 @@ import com.example.ela.domain.usecase.important_date.SaveImportantDateUseCase
 import com.example.ela.domain.usecase.reminder.DeleteReminderUseCase
 import com.example.ela.domain.usecase.reminder.GetRemindersUseCase
 import com.example.ela.domain.usecase.reminder.SaveReminderUseCase
+import com.example.ela.ui.screens.reminder.ReminderFilterType
 import com.example.ela.ui.screens.reminder.ReminderUiState
+import com.example.ela.ui.screens.reminder.TimelineItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,15 +41,72 @@ class ReminderViewModel @Inject constructor(
                 getRemindersUseCase(),
                 getImportantDatesUseCase()
             ) { reminders, dates ->
+                updateFilteredEvents(reminders, dates)
                 ReminderUiState(
                     reminders = reminders,
                     importantDates = dates,
-                    isLoading = false
+                    isLoading = false,
+                    searchQuery = _state.value.searchQuery,
+                    filterType = _state.value.filterType,
+                    filteredEvents = calculateFilteredEvents(reminders, dates, _state.value.searchQuery, _state.value.filterType)
                 )
             }.collect {
                 _state.value = it
             }
         }
+    }
+
+    private fun updateFilteredEvents(reminders: List<Reminder>, dates: List<ImportantDate>) {
+        val filtered = calculateFilteredEvents(reminders, dates, _state.value.searchQuery, _state.value.filterType)
+        _state.value = _state.value.copy(filteredEvents = filtered)
+    }
+
+    private fun calculateFilteredEvents(
+        reminders: List<Reminder>,
+        dates: List<ImportantDate>,
+        query: String,
+        filter: ReminderFilterType
+    ): List<TimelineItem> {
+        val filteredReminders = reminders.filter {
+            (filter == ReminderFilterType.ALL || filter == ReminderFilterType.REMINDERS) &&
+            (query.isBlank() || it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true))
+        }.map { TimelineItem.HealthReminder(it) }
+
+        val filteredDates = dates.filter {
+            (filter == ReminderFilterType.ALL || filter == ReminderFilterType.SPECIAL_DATES) &&
+            (query.isBlank() || it.title.contains(query, ignoreCase = true))
+        }.map { TimelineItem.SpecialDate(it) }
+
+        return (filteredReminders + filteredDates).sortedBy {
+            when (it) {
+                is TimelineItem.HealthReminder -> it.reminder.date
+                is TimelineItem.SpecialDate -> it.date.date
+            }
+        }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        val newState = _state.value.copy(searchQuery = query)
+        _state.value = newState.copy(
+            filteredEvents = calculateFilteredEvents(
+                newState.reminders,
+                newState.importantDates,
+                query,
+                newState.filterType
+            )
+        )
+    }
+
+    fun onFilterTypeChange(type: ReminderFilterType) {
+        val newState = _state.value.copy(filterType = type)
+        _state.value = newState.copy(
+            filteredEvents = calculateFilteredEvents(
+                newState.reminders,
+                newState.importantDates,
+                newState.searchQuery,
+                type
+            )
+        )
     }
 
     fun save(reminder: Reminder) {
