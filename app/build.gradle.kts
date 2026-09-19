@@ -54,6 +54,7 @@ android {
 dependencies {
 
     implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.androidx.compose.remote.creation.core)
     implementation(libs.google.accompanist.systemuicontroller)
 
 

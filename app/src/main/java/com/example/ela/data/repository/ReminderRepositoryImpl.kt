@@ -32,7 +32,7 @@ class ReminderRepositoryImpl (
             id = generatedId
         )
         try {
-            collection.document(reminder.id.toString())
+            collection.document(reminderWithId.id.toString())
                 .set(reminderWithId.toDto())
                 .await()
         } catch (e: Exception) {
