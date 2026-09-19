@@ -16,6 +16,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import com.example.ela.ui.theme.ElaTheme
 import com.example.ela.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -27,6 +32,7 @@ fun SettingsScreen(
     onClickPreferences: () -> Unit,
     onClickManegeCare: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
     SettingsContent(
@@ -59,7 +65,14 @@ fun SettingsScreen(
             viewModel.onDismissDeleteConfirmation()
         },
         onClickPreferences = onClickPreferences,
-        onClickManegeCare = onClickManegeCare
+        onClickManegeCare = onClickManegeCare,
+        openEmail = {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:saullo.programador@gmail.com")
+                putExtra(Intent.EXTRA_SUBJECT, "Sugestão ou Feedback - Ela+")
+            }
+            context.startActivity(intent)
+        }
     )
 }
 
@@ -77,7 +90,8 @@ fun SettingsContent(
     onConfirmDeleteClick: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
     onClickPreferences: () -> Unit = {},
-    onClickManegeCare: () -> Unit = {}
+    onClickManegeCare: () -> Unit = {},
+    openEmail: () -> Unit = {}
 ) {
 
     val scrollState = rememberScrollState()
@@ -204,7 +218,7 @@ fun SettingsContent(
             Text(
                 text = "Configurações",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(
@@ -386,26 +400,25 @@ fun SettingsContent(
                 }
 
 
-                SettingSwitchItem(
-                    icon = Icons.Default.Cloud,
-                    title = "Sincronização na nuvem",
-                    description = "Backup automático dos dados",
-                    checked = syncEnabled,
-                    onCheckedChange = {
-                        syncEnabled = it
-                    }
-                )
+//                SettingSwitchItem(
+//                    icon = Icons.Default.Cloud,
+//                    title = "Sincronização na nuvem",
+//                    description = "Backup automático dos dados",
+//                    checked = syncEnabled,
+//                    onCheckedChange = {
+//                        syncEnabled = it
+//                    }
+//                )
 
-
-                SettingSwitchItem(
-                    icon = Icons.Default.Backup,
-                    title = "Backup automático",
-                    description = "Criar backup diariamente",
-                    checked = backupEnabled,
-                    onCheckedChange = {
-                        backupEnabled = it
-                    }
-                )
+//                SettingSwitchItem(
+//                    icon = Icons.Default.Backup,
+//                    title = "Backup automático",
+//                    description = "Criar backup diariamente",
+//                    checked = backupEnabled,
+//                    onCheckedChange = {
+//                        backupEnabled = it
+//                    }
+//                )
 
                 SettingClickableItem(
                     icon = Icons.Default.Favorite,
@@ -473,7 +486,8 @@ fun SettingsContent(
                 SettingClickableItem(
                     icon = Icons.Default.Email,
                     title = "Entre em contato",
-                    description = "Envie sugestões e feedback"
+                    description = "Envie sugestões e feedback",
+                    onClick = openEmail
                 )
             }
 
@@ -559,7 +573,7 @@ fun SettingsSection(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
 
@@ -590,7 +604,7 @@ fun SettingsSection(
 
 @Composable
 fun SettingSwitchItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     description: String,
     checked: Boolean,
@@ -632,7 +646,7 @@ fun SettingSwitchItem(
 
 @Composable
 fun SettingTimeItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     time: String,
     onTimeSelected: (String) -> Unit
@@ -783,7 +797,7 @@ fun TimePickerDialog(
 
 @Composable
 fun SettingClickableItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     description: String,
     onClick: () -> Unit = {}
