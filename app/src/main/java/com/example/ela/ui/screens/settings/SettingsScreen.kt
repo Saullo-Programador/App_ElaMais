@@ -19,11 +19,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
 import com.example.ela.ui.theme.ElaTheme
 import com.example.ela.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 
 @Composable
@@ -68,7 +68,7 @@ fun SettingsScreen(
         onClickManegeCare = onClickManegeCare,
         openEmail = {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:saullo.programador@gmail.com")
+                data = "mailto:saullo.programador@gmail.com".toUri()
                 putExtra(Intent.EXTRA_SUBJECT, "Sugestão ou Feedback - Ela+")
             }
             context.startActivity(intent)
@@ -391,14 +391,13 @@ fun SettingsContent(
                 title = "Privacidade e Dados"
             ) {
 
-                var syncEnabled by remember {
-                    mutableStateOf(true)
-                }
-
-                var backupEnabled by remember {
-                    mutableStateOf(true)
-                }
-
+//                var syncEnabled by remember {
+//                    mutableStateOf(true)
+//                }
+//
+//                var backupEnabled by remember {
+//                    mutableStateOf(true)
+//                }
 
 //                SettingSwitchItem(
 //                    icon = Icons.Default.Cloud,

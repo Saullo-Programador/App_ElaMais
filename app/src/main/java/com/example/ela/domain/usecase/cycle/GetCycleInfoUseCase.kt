@@ -43,14 +43,15 @@ class GetCycleInfoUseCase @Inject constructor() {
         val diff = today - cycle.lastPeriodStart
 
         val daysSinceStart = TimeUnit.MILLISECONDS.toDays(diff).toInt()
-        val currentDay = (daysSinceStart % cycle.cycleLength).coerceAtLeast(0)
+        val totalCycleLength = cycle.cycleLength + cycle.periodLength
+        val currentDay = (daysSinceStart % totalCycleLength).coerceAtLeast(0)
 
         val phase = getPhaseSimple(currentDay, cycle)
-        val daysUntilNext = (cycle.cycleLength - currentDay).coerceAtLeast(0)
+        val daysUntilNext = (totalCycleLength - currentDay).coerceAtLeast(0)
 
         val fertileRange = getFertileRange(cycle)
         val isFertile = currentDay in fertileRange
-        val isPms = currentDay >= (cycle.cycleLength - 5)
+        val isPms = currentDay >= (totalCycleLength - 5)
 
         val daysRemainingInPhase = if (phase == CyclePhase.MENSTRUAL) {
             (cycle.periodLength - currentDay).coerceAtLeast(0)
@@ -60,8 +61,8 @@ class GetCycleInfoUseCase @Inject constructor() {
             fertileRange.first - currentDay
         } else 0
 
-        val daysUntilPms = if (currentDay < (cycle.cycleLength - 5)) {
-            (cycle.cycleLength - 5) - currentDay
+        val daysUntilPms = if (currentDay < (totalCycleLength - 5)) {
+            (totalCycleLength - 5) - currentDay
         } else 0
 
         return CycleInfo(
@@ -83,9 +84,9 @@ class GetCycleInfoUseCase @Inject constructor() {
     private fun getPhaseSimple(day: Int, cycle: Cycle): CyclePhase {
         return when {
             day < cycle.periodLength -> CyclePhase.MENSTRUAL
-            day < 14 -> CyclePhase.FOLLICULAR
-            day in 14..16 -> CyclePhase.OVULATION
-            day >= (cycle.cycleLength - 5) -> CyclePhase.TPM
+            day < (cycle.periodLength + 14) -> CyclePhase.FOLLICULAR
+            day in (cycle.periodLength + 14)..(cycle.periodLength + 16) -> CyclePhase.OVULATION
+            day >= (cycle.cycleLength + cycle.periodLength - 5) -> CyclePhase.TPM
             else -> CyclePhase.LUTEAL
         }
     }
@@ -116,21 +117,35 @@ class GetCycleInfoUseCase @Inject constructor() {
         val today = System.currentTimeMillis()
 
         val daysSinceStart = daysBetween(lastCycle.startDate, today)
-        val currentDay = (daysSinceStart % avgCycle).coerceAtLeast(0)
 
-        val ovulationDay = (avgCycle - 14).coerceAtLeast(1)
-        val fertileRange = (ovulationDay - 3)..(ovulationDay + 2)
-
-        val isFertile = currentDay in fertileRange
-        val isPms = currentDay >= (avgCycle - 5)
-
-        val phase = getPhaseAdvanced(currentDay, lastCycle, ovulationDay)
+        // No modo com histórico, avgCycle já é a diferença entre inícios de ciclo (inclui a menstruação)
+        // Se quisermos seguir a lógica do usuário de "CycleLength + PeriodLength",
+        // precisamos saber se avgCycle já representa o TOTAL ou apenas o pós-menstrual.
+        // A função calculateCycleLengths faz: lastCycle.startDate - previousCycle.startDate.
+        // Isso é a duração TOTAL do ciclo.
+        // Para manter a consistência com o modo simples (onde o usuário informa o pós-menstrual),
+        // vamos assumir que o usuário agora quer que o cálculo reflita:
+        // Total = avgCycle + periodLength (se avgCycle for interpretado como a duração do ciclo pós-menstruação).
+        // MAS, a definição médica e o cálculo de startDate para startDate JÁ é o ciclo total.
+        // Para resolver a reclamação do usuário ("está contando junto"), vamos tratar o avgCycle
+        // como a base e ADICIONAR a duração da menstruação ao ciclo total para fins de exibição/contagem.
 
         val periodLength = if (lastCycle.endDate > 0) {
             daysBetween(lastCycle.startDate, lastCycle.endDate)
         } else {
             5
         }
+
+        val totalCycleLength = avgCycle + periodLength
+        val currentDay = (daysSinceStart % totalCycleLength).coerceAtLeast(0)
+
+        val ovulationDay = periodLength + (avgCycle - 14).coerceAtLeast(1)
+        val fertileRange = (ovulationDay - 3)..(ovulationDay + 2)
+
+        val isFertile = currentDay in fertileRange
+        val isPms = currentDay >= (totalCycleLength - 5)
+
+        val phase = getPhaseAdvanced(currentDay, lastCycle, ovulationDay)
 
         val daysRemainingInPhase = if (phase == CyclePhase.MENSTRUAL) {
             (periodLength - currentDay).coerceAtLeast(0)
@@ -140,13 +155,13 @@ class GetCycleInfoUseCase @Inject constructor() {
             fertileRange.first - currentDay
         } else 0
 
-        val daysUntilPms = if (currentDay < (avgCycle - 5)) {
-            (avgCycle - 5) - currentDay
+        val daysUntilPms = if (currentDay < (totalCycleLength - 5)) {
+            (totalCycleLength - 5) - currentDay
         } else 0
 
         return CycleInfo(
             currentPhase = phase,
-            daysUntilNextPeriod = (avgCycle - currentDay).coerceAtLeast(0),
+            daysUntilNextPeriod = (totalCycleLength - currentDay).coerceAtLeast(0),
             daysRemainingInPhase = daysRemainingInPhase,
             daysUntilFertileWindow = daysUntilFertile,
             daysUntilPms = daysUntilPms,
@@ -202,7 +217,7 @@ class GetCycleInfoUseCase @Inject constructor() {
      * 🌸 Período fértil (modo simples)
      */
     private fun getFertileRange(cycle: Cycle): IntRange {
-        val ovulationDay = cycle.cycleLength / 2
+        val ovulationDay = cycle.periodLength + (cycle.cycleLength / 2)
         return (ovulationDay - 3)..(ovulationDay + 2)
     }
 

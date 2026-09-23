@@ -29,7 +29,8 @@ class GetCycleInfoUseCaseTest {
         // Verificação
         assertEquals("Deveria estar na fase MENSTRUAL no 3º dia", CyclePhase.MENSTRUAL, result.currentPhase)
         assertTrue("Deveria indicar que possui dados", result.hasData)
-        assertEquals("Faltam 25 dias para o próximo ciclo", 25, result.daysUntilNextPeriod)
+        // Ciclo total = 28 + 5 = 33. Dia atual = 3. Faltam 33 - 3 = 30 dias.
+        assertEquals("Faltam 30 dias para o próximo ciclo", 30, result.daysUntilNextPeriod)
     }
 
     @Test
@@ -51,30 +52,33 @@ class GetCycleInfoUseCaseTest {
         val result = useCase(null, history)
 
         // Verificação
-        // Média de ciclo = (28 + 30) / 2 = 29.
+        // Média de ciclo (intervalo entre inícios) = (28 + 30) / 2 = 29.
+        // Adicionando a duração da menstruação (5 dias): Total = 29 + 5 = 34.
         // Dia atual = 0.
-        // Dias até o próximo = 29 - 0 = 29.
-        assertEquals("A média de ciclo deveria ser 29 dias", 29, result.daysUntilNextPeriod)
+        // Dias até o próximo = 34 - 0 = 34.
+        assertEquals("A média de ciclo total deveria ser 34 dias", 34, result.daysUntilNextPeriod)
         assertEquals("No dia 0 a fase deve ser MENSTRUAL", CyclePhase.MENSTRUAL, result.currentPhase)
     }
 
     @Test
     fun `test calculateSimple returns TPM phase near end of cycle`() {
-        // Preparação: ciclo de 28 dias, começou há 25 dias (está no dia 25)
-        // No código, TPM começa em cycleLength - 5 (28 - 5 = 23)
-        val twentyFiveDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(25)
+        // Preparação: ciclo de 28 dias, menstruação de 5 dias. Ciclo Total = 33.
+        // Começou há 25 dias (está no dia 25).
+        // TPM começa em Total - 5 (33 - 5 = 28).
+        // No dia 25, ainda não é TPM. Vamos testar no dia 29.
+        val twentyNineDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(29)
         val cycle = Cycle(
             id = 1,
             cycleLength = 28,
             periodLength = 5,
-            lastPeriodStart = twentyFiveDaysAgo
+            lastPeriodStart = twentyNineDaysAgo
         )
 
         // Ação
         val result = useCase(cycle, emptyList())
 
         // Verificação
-        assertEquals("Deveria estar na fase TPM no dia 25", CyclePhase.TPM, result.currentPhase)
+        assertEquals("Deveria estar na fase TPM no dia 29", CyclePhase.TPM, result.currentPhase)
         assertTrue("Deveria indicar estado de TPM", result.isPms)
     }
 }
