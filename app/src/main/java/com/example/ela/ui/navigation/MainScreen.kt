@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.example.ela.domain.model.CyclePhase
 import com.example.ela.ui.screens.auth.LoginScreen
 import com.example.ela.ui.screens.auth.LoginViewModel
+import com.example.ela.ui.screens.auth.SignUpScreen
 import com.example.ela.ui.screens.care.CareScreen
 import com.example.ela.ui.screens.care.ManageCareScreen
 import com.example.ela.ui.screens.cycle.CycleScreen
@@ -45,9 +46,10 @@ fun MainScreen() {
 
     val showBottomBar = currentRoute != Screen.Preferences.route &&
                         currentRoute != Screen.ManageCare.route &&
-                        currentRoute != Screen.Splash.route
-                        currentRoute != Screen.Login.route
-                        currentRoute != Screen.Signup.route
+                        currentRoute != Screen.Splash.route &&
+                        currentRoute != Screen.Login.route &&
+                        currentRoute != Screen.Signup.route &&
+                        currentRoute != Screen.ForgotPassword.route
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -74,10 +76,29 @@ fun MainScreen() {
 
             // 🔐 AUTH
             composable(Screen.Login.route) {
-                LoginScreen(navController = navController)
+                LoginScreen(
+                    navController = navController,
+                    onSignup = {
+                        navController.navigate(Screen.Signup.route)
+                    },
+                    onForgotPassword = {
+                        navController.navigate(Screen.ForgotPassword.route)
+                    }
+                )
             }
             composable(Screen.Signup.route) {
-                com.example.ela.ui.screens.auth.SignUpScreen(navController = navController)
+                SignUpScreen(
+                    navController = navController,
+                    onLogin = {
+                        navController.navigate(Screen.Login.route)
+                    }
+                )
+            }
+            composable(Screen.ForgotPassword.route) {
+                com.example.ela.ui.screens.auth.ForgotPasswordScreen(
+                    navController = navController,
+                    viewModel = authViewModel
+                )
             }
 
             // 🏠 HOME

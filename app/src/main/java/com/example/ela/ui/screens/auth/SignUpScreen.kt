@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -34,7 +35,8 @@ import com.example.ela.ui.theme.ElaTheme
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    onLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -48,7 +50,7 @@ fun SignUpScreen(
 
     SignUpScreenContent(
         uiState = uiState,
-        onLogin = { email, password -> viewModel.login(email, password) },
+        onLogin = { onLogin() },
         onSignup = { email, password -> viewModel.signup(email, password) }
     )
 }
@@ -56,7 +58,7 @@ fun SignUpScreen(
 @Composable
 fun SignUpScreenContent(
     uiState: AuthUiState,
-    onLogin: (String, String) -> Unit,
+    onLogin: () -> Unit,
     onSignup: (String, String) -> Unit
 ) {
     var userName by remember { mutableStateOf("") }
@@ -122,7 +124,6 @@ fun SignUpScreenContent(
                 placeholder = "Digite seu nome",
                 leadingIcon = Icons.Default.Person,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Email Input
@@ -133,7 +134,6 @@ fun SignUpScreenContent(
                 placeholder = "exemplo@email.com",
                 leadingIcon = Icons.Default.Email,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Password Input
@@ -147,7 +147,6 @@ fun SignUpScreenContent(
                 trailingIcon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 onTrailingIconClick = { passwordVisible = !passwordVisible },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Confirm Password Input
@@ -161,12 +160,13 @@ fun SignUpScreenContent(
                 trailingIcon = if (passwordConfirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 onTrailingIconClick = { passwordConfirmVisible = !passwordConfirmVisible },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             // Sign Up Button
             ButtonComponent(
                 text = "Cadastrar",
+                textColor = Color.White,
                 loading = uiState is AuthUiState.Loading,
                 onClick = {
                     onSignup(email, password)
@@ -175,7 +175,7 @@ fun SignUpScreenContent(
 
             // Footer Navigation
             Row(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ){
@@ -185,7 +185,7 @@ fun SignUpScreenContent(
                 )
                 TextButton(
                     onClick = {
-                        onLogin(email, password)
+                        onLogin()
                     },
                 ) {
                     Text(
@@ -215,7 +215,7 @@ fun SignUpPreview() {
     ElaTheme {
         SignUpScreenContent(
             uiState = AuthUiState.Idle,
-            onLogin = { _, _ -> },
+            onLogin = {},
             onSignup = { _, _ -> }
         )
     }

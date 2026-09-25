@@ -18,6 +18,9 @@ sealed class Screen(val route: String) {
     object Signup : Screen("signup")
 
     @Serializable
+    object ForgotPassword : Screen("forgot_password")
+
+    @Serializable
     object Care : Screen("care/{phase}") {
         fun createRoute(phase: String) = "care/$phase"
     }

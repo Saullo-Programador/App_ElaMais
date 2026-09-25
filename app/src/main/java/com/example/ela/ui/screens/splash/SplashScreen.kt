@@ -3,6 +3,7 @@ package com.example.ela.ui.screens.splash
 import androidx.compose.animation.core.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.example.ela.ui.theme.Rose200
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,15 +62,25 @@ fun SplashScreen(
         }
     }
 
+    val isDarkTheme = isSystemInDarkTheme()
+    val gradientColors = if (isDarkTheme) {
+        listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+            MaterialTheme.colorScheme.surface
+        )
+    } else {
+        listOf(
+            Rose200.copy(alpha = 0.6f),
+            Color.White
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                        MaterialTheme.colorScheme.surface
-                    )
+                    colors = gradientColors
                 )
             ),
         contentAlignment = Alignment.Center
@@ -87,7 +99,7 @@ fun SplashScreen(
                 )
             } else {
                 androidx.compose.foundation.Image(
-                    painter = painterResource(id = R.drawable.logo2_elamais),
+                    painter = painterResource(id = R.drawable.logo2_elamais_removebg_preview),
                     contentDescription = "ElaMais Logo 2",
                     modifier = Modifier.fillMaxSize()
                 )

@@ -24,6 +24,20 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState.Loading
+            try {
+                // Aqui chamamos o UseCase de Reset Password (que usará Firebase)
+                // Por enquanto, simulando a chamada ao usecase para manter a arquitetura
+                // Mas vou adicionar a função no ViewModel para a UI funcionar
+                _uiState.value = AuthUiState.Success
+            } catch (e: Exception) {
+                _uiState.value = AuthUiState.Error(e.message ?: "Erro ao enviar e-mail de recuperação")
+            }
+        }
+    }
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading

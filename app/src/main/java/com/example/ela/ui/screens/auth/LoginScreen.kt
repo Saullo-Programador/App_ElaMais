@@ -1,5 +1,6 @@
 package com.example.ela.ui.screens.auth
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import com.example.ela.ui.theme.Rose200
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,7 +36,9 @@ import com.example.ela.ui.theme.ElaTheme
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    onSignup: () -> Unit,
+    onForgotPassword: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -48,7 +53,8 @@ fun LoginScreen(
     LoginScreenContent(
         uiState = uiState,
         onLogin = { email, password -> viewModel.login(email, password) },
-        onSignup = { email, password -> viewModel.signup(email, password) }
+        onSignup = { onSignup() },
+        onForgotPassword = { onForgotPassword() }
     )
 }
 
@@ -56,21 +62,32 @@ fun LoginScreen(
 fun LoginScreenContent(
     uiState: AuthUiState,
     onLogin: (String, String) -> Unit,
-    onSignup: (String, String) -> Unit
+    onSignup: () -> Unit,
+    onForgotPassword: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val isDarkTheme = isSystemInDarkTheme()
+    val gradientColors = if (isDarkTheme) {
+        listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface
+        )
+    } else {
+        listOf(
+            Rose200.copy(alpha = 0.6f),
+            Color.White
+        )
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                        MaterialTheme.colorScheme.surface
-                    )
+                    colors = gradientColors
                 )
             )
             .padding(horizontal = 24.dp),
@@ -118,7 +135,6 @@ fun LoginScreenContent(
                 placeholder = "exemplo@email.com",
                 leadingIcon = Icons.Default.Email,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Password Input
@@ -132,29 +148,30 @@ fun LoginScreenContent(
                 trailingIcon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 onTrailingIconClick = { passwordVisible = !passwordVisible },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Forgot Password
-            TextButton(
-                onClick = { /* TODO: Implement forgot password */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.End),
-                contentPadding = PaddingValues(0.dp)
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
             ) {
-                Text(
-                    text = "Esqueceu a senha?",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                TextButton(
+                    onClick = onForgotPassword,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(
+                        text = "Esqueceu a senha?",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Login Button
             ButtonComponent(
                 text = "Entrar",
+                textColor = Color.White,
                 loading = uiState is AuthUiState.Loading,
                 onClick = {
                     onLogin(email, password)
@@ -163,7 +180,7 @@ fun LoginScreenContent(
 
             // Footer Navigation
             Row(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ){
@@ -173,7 +190,7 @@ fun LoginScreenContent(
                 )
                 TextButton(
                     onClick = {
-                        onSignup(email, password)
+                        onSignup()
                     },
                 ) {
                     Text(
@@ -204,7 +221,8 @@ fun LoginPreview() {
         LoginScreenContent(
             uiState = AuthUiState.Idle,
             onLogin = { _, _ -> },
-            onSignup = { _, _ -> }
+            onSignup = { },
+            onForgotPassword = { }
         )
     }
 }
