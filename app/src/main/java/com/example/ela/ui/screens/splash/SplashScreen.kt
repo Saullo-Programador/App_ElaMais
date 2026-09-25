@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.example.ela.R
 import com.example.ela.ui.navigation.Screen
 import com.example.ela.ui.screens.auth.LoginViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun SplashScreen(
@@ -47,11 +48,11 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         // Step 1: Show Logo 1
         logoStep = 0
-        kotlinx.coroutines.delay(1500)
+        kotlinx.coroutines.delay(1500.milliseconds)
 
         // Step 2: Transition to Logo 2
         logoStep = 1
-        kotlinx.coroutines.delay(1500)
+        kotlinx.coroutines.delay(1500.milliseconds)
 
         // Step 3: Navigate to appropriate screen
         val isAuthenticated = authViewModel.isUserAuthenticated()
