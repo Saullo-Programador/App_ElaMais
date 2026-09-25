@@ -162,7 +162,9 @@ fun LoginScreenContent(
                 placeholder = "exemplo@email.com",
                 leadingIcon = Icons.Default.Email,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                testTag = "email_field"
             )
+
 
             // Password Input
             InputComponent(
@@ -175,7 +177,9 @@ fun LoginScreenContent(
                 trailingIcon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                 onTrailingIconClick = { passwordVisible = !passwordVisible },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                testTag = "password_field"
             )
+
 
             // Forgot Password
             Box(
