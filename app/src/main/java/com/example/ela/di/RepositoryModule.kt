@@ -11,12 +11,14 @@ import com.example.ela.data.repository.CycleRecordRepositoryImpl
 import com.example.ela.data.repository.ImportantDateRepositoryImpl
 import com.example.ela.data.repository.PreferencesRepositoryImpl
 import com.example.ela.data.repository.ReminderRepositoryImpl
+import com.example.ela.data.repository.AuthRepositoryImpl
 import com.example.ela.domain.repository.CareActionRepository
 import com.example.ela.domain.repository.CycleRepository
 import com.example.ela.domain.repository.CycleRecordRepository
 import com.example.ela.domain.repository.ImportantDateRepository
 import com.example.ela.domain.repository.PreferencesRepository
 import com.example.ela.domain.repository.ReminderRepository
+import com.example.ela.domain.repository.AuthRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -26,6 +28,11 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
+
+    @Provides
+    fun provideAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository = impl
 
     @Provides
     fun provideCycleRepository(

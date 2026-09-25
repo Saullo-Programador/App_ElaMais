@@ -1,0 +1,115 @@
+package com.example.ela.data.repository
+
+import com.example.ela.data.local.dao.CycleDao
+import com.example.ela.domain.model.Cycle
+import com.example.ela.domain.repository.CycleRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import io.mockk.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class CycleRepositoryIsolationTest {
+
+    private val dao = mockk<CycleDao>(relaxed = true)
+    private val firestore = mockk<FirebaseFirestore>()
+    private val auth = mockk<FirebaseAuth>()
+    private val currentUser = mockk<FirebaseUser>()
+
+    private lateinit var repository: CycleRepositoryImpl
+
+    @Before
+    fun setup() {
+        // Default Mock setup for Firebase chain
+        val usersCollection = mockk<CollectionReference>()
+        val userDoc = mockk<DocumentReference>()
+        val cycleCollection = mockk<CollectionReference>()
+        val cycleDoc = mockk<DocumentReference>()
+
+        every { firestore.collection("users") } returns usersCollection
+        every { usersCollection.document(any()) } returns userDoc
+        every { userDoc.collection("cycle") } returns cycleCollection
+        every { cycleCollection.document("single_cycle") } returns cycleDoc
+
+        // Mock the .set().await() chain (simulated by returning a task that completes)
+        every { cycleDoc.set(any()) } returns mockk(relaxed = true)
+
+        repository = CycleRepositoryImpl(dao, firestore, auth)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
+    }
+
+    @Test
+    fun `saveCycle should use the current user uid in the path`() = runTest {
+        // Given
+        val userId = "user_123"
+        val cycle = Cycle(id = 1, startDate = "2023-01-01", endDate = "2023-01-28", length = 28)
+
+        every { auth.currentUser } returns currentUser
+        every { currentUser.uid } returns userId
+
+        // When
+        repository.saveCycle(cycle)
+
+        // Then
+        verify {
+            firestore.collection("users").document(userId).collection("cycle").document("single_cycle").set(any())
+        }
+    }
+
+    @Test
+    fun `saveCycle should NOT call firebase when user is not authenticated`() = runTest {
+        // Given
+        val cycle = Cycle(id = 1, startDate = "2023-01-01", endDate = "2023-01-28", length = 28)
+        every { auth.currentUser } returns null
+
+        // When
+        repository.saveCycle(cycle)
+
+        // Then
+        verify(exactly = 0) { firestore.collection(any()) }
+    }
+
+    @Test
+    fun `syncCycle should fetch data from the correct user document`() = runTest {
+        // Given
+        val userId = "user_456"
+        every { auth.currentUser } returns currentUser
+        every { currentUser.uid } returns userId
+
+        val mockSnapshot = mockk<DocumentSnapshot>()
+        val mockCycleDto = mockk<com.example.ela.data.remote.dto.CycleDto>()
+
+        every {
+            firestore.collection("users").document(userId).collection("cycle").document("single_cycle").get()
+        } returns mockk {
+            every { await() } returns mockSnapshot
+        }
+        every { mockSnapshot.toObject(com.example.ela.data.remote.dto.CycleDto::class.java) } returns mockCycleDto
+
+        // Mock DAO to avoid crashes
+        every { dao.insertCycle(any()) } returns Unit
+
+        // When
+        repository.syncCycle()
+
+        // Then
+        verify {
+            firestore.collection("users").document(userId).collection("cycle").document("single_cycle").get()
+        }
+    }
+}

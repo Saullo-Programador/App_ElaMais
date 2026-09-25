@@ -15,6 +15,8 @@ import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.ela.domain.model.CyclePhase
+import com.example.ela.ui.screens.auth.LoginScreen
+import com.example.ela.ui.screens.auth.LoginViewModel
 import com.example.ela.ui.screens.care.CareScreen
 import com.example.ela.ui.screens.care.ManageCareScreen
 import com.example.ela.ui.screens.cycle.CycleScreen
@@ -22,6 +24,7 @@ import com.example.ela.ui.screens.home.HomeScreen
 import com.example.ela.ui.screens.preferences.PreferencesScreen
 import com.example.ela.ui.screens.reminder.ReminderScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
+import com.example.ela.ui.screens.splash.SplashScreen
 import com.example.ela.viewmodel.HomeViewModel
 import com.example.ela.ui.theme.ElaTheme
 
@@ -29,14 +32,22 @@ import com.example.ela.ui.theme.ElaTheme
 fun MainScreen() {
     val navController = rememberNavController()
     val homeViewModel: HomeViewModel = hiltViewModel()
+    val authViewModel: LoginViewModel = hiltViewModel()
     val homeState by homeViewModel.state.collectAsState()
     val currentPhase = homeState.cycleInfo?.currentPhase ?: CyclePhase.FOLLICULAR
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val isUserAuthenticated = authViewModel.isUserAuthenticated()
+    val startDestination = Screen.Splash.route
+
+
     val showBottomBar = currentRoute != Screen.Preferences.route &&
-                        currentRoute != Screen.ManageCare.route
+                        currentRoute != Screen.ManageCare.route &&
+                        currentRoute != Screen.Splash.route
+                        currentRoute != Screen.Login.route
+                        currentRoute != Screen.Signup.route
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -50,9 +61,24 @@ fun MainScreen() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(padding)
         ) {
+            // 🚀 SPLASH
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    navController = navController,
+                    authViewModel = authViewModel
+                )
+            }
+
+            // 🔐 AUTH
+            composable(Screen.Login.route) {
+                LoginScreen(navController = navController)
+            }
+            composable(Screen.Signup.route) {
+                com.example.ela.ui.screens.auth.SignUpScreen(navController = navController)
+            }
 
             // 🏠 HOME
             composable(Screen.Home.route) {
