@@ -3,6 +3,7 @@ package com.example.ela.ui.screens.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ela.domain.usecase.auth.GetCurrentUserUseCase
+import com.example.ela.domain.usecase.auth.GoogleLoginUseCase
 import com.example.ela.domain.usecase.auth.LoginUseCase
 import com.example.ela.domain.usecase.auth.LogoutUseCase
 import com.example.ela.domain.usecase.auth.SignupUseCase
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val signupUseCase: SignupUseCase,
+    private val googleLoginUseCase: GoogleLoginUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase
 ) : ViewModel() {
@@ -58,6 +60,18 @@ class LoginViewModel @Inject constructor(
                 _uiState.value = AuthUiState.Success
             } else {
                 _uiState.value = AuthUiState.Error(result.exceptionOrNull()?.message ?: "Erro ao criar conta")
+            }
+        }
+    }
+
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState.Loading
+            val result = googleLoginUseCase(idToken)
+            if (result.isSuccess) {
+                _uiState.value = AuthUiState.Success
+            } else {
+                _uiState.value = AuthUiState.Error(result.exceptionOrNull()?.message ?: "Erro ao fazer login com Google")
             }
         }
     }

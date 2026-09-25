@@ -45,6 +45,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += "-Xskip-metadata-version-check"
     }
     buildFeatures {
         compose = true
@@ -127,4 +128,8 @@ dependencies {
 // Debug necessário para Compose UI Test
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

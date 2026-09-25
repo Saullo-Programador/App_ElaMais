@@ -13,11 +13,14 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import com.example.ela.ui.theme.Rose200
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,9 +32,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.ela.R
 import com.example.ela.ui.components.ButtonComponent
 import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.theme.ElaTheme
+import com.example.ela.ui.auth.GoogleAuthHelper
+import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun LoginScreen(
@@ -53,6 +60,7 @@ fun LoginScreen(
     LoginScreenContent(
         uiState = uiState,
         onLogin = { email, password -> viewModel.login(email, password) },
+        onGoogleLogin = { idToken -> viewModel.loginWithGoogle(idToken) },
         onSignup = { onSignup() },
         onForgotPassword = { onForgotPassword() }
     )
@@ -62,12 +70,20 @@ fun LoginScreen(
 fun LoginScreenContent(
     uiState: AuthUiState,
     onLogin: (String, String) -> Unit,
+    onGoogleLogin: (String) -> Unit,
     onSignup: () -> Unit,
     onForgotPassword: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val googleAuthHelper = remember { GoogleAuthHelper(context) }
+
+    val webClientId = stringResource(R.string.default_web_client_id)
+
 
     val isDarkTheme = isSystemInDarkTheme()
     val gradientColors = if (isDarkTheme) {
@@ -80,6 +96,17 @@ fun LoginScreenContent(
             Rose200.copy(alpha = 0.6f),
             Color.White
         )
+    }
+
+    fun loginWithGoogle() {
+        coroutineScope.launch {
+            val idToken = googleAuthHelper.getIdToken(webClientId)
+            if (idToken != null) {
+                onGoogleLogin(idToken)
+            } else {
+                println("Erro ao obter token do Google")
+            }
+        }
     }
 
     Box(
@@ -178,6 +205,65 @@ fun LoginScreenContent(
                 }
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // OR Divider
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = DividerDefaults.Thickness,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                Text(
+                    text = " ou ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = DividerDefaults.Thickness,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Google Login Button
+            OutlinedButton(
+                onClick = {
+                    loginWithGoogle()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    // Using a simple Icon as a placeholder for the Google Logo
+                    Icon(
+                        painter = painterResource(R.drawable.google_logo), // Replace with actual Google Icon resource
+                        contentDescription = "Google Icon",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Unspecified // To keep original colors if it were a painterResource
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Entrar com Google",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
             // Footer Navigation
             Row(
                 modifier = Modifier.padding(top = 20.dp),
@@ -221,6 +307,7 @@ fun LoginPreview() {
         LoginScreenContent(
             uiState = AuthUiState.Idle,
             onLogin = { _, _ -> },
+            onGoogleLogin = { _ -> },
             onSignup = { },
             onForgotPassword = { }
         )

@@ -2,6 +2,7 @@ package com.example.ela.ui.screens.auth
 
 import com.example.ela.domain.model.User
 import com.example.ela.domain.usecase.auth.GetCurrentUserUseCase
+import com.example.ela.domain.usecase.auth.GoogleLoginUseCase
 import com.example.ela.domain.usecase.auth.LoginUseCase
 import com.example.ela.domain.usecase.auth.LogoutUseCase
 import com.example.ela.domain.usecase.auth.SignupUseCase
@@ -21,6 +22,7 @@ class LoginViewModelTest {
 
     private val loginUseCase = mockk<LoginUseCase>()
     private val signupUseCase = mockk<SignupUseCase>()
+    private val googleLoginUseCase = mockk<GoogleLoginUseCase>()
     private val logoutUseCase = mockk<LogoutUseCase>()
     private val getCurrentUserUseCase = mockk<GetCurrentUserUseCase>()
 
@@ -46,7 +48,7 @@ class LoginViewModelTest {
 
         coEvery { loginUseCase(email, password) } returns Result.success(user)
 
-        val viewModel = LoginViewModel(loginUseCase, signupUseCase, logoutUseCase, getCurrentUserUseCase)
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
 
         // When
         viewModel.login(email, password)
@@ -65,7 +67,7 @@ class LoginViewModelTest {
 
         coEvery { loginUseCase(email, password) } returns Result.failure(Exception(errorMessage))
 
-        val viewModel = LoginViewModel(loginUseCase, signupUseCase, logoutUseCase, getCurrentUserUseCase)
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
 
         // When
         viewModel.login(email, password)
@@ -86,7 +88,7 @@ class LoginViewModelTest {
 
         coEvery { signupUseCase(email, password) } returns Result.success(user)
 
-        val viewModel = LoginViewModel(loginUseCase, signupUseCase, logoutUseCase, getCurrentUserUseCase)
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
 
         // When
         viewModel.signup(email, password)
@@ -105,7 +107,7 @@ class LoginViewModelTest {
 
         coEvery { signupUseCase(email, password) } returns Result.failure(Exception(errorMessage))
 
-        val viewModel = LoginViewModel(loginUseCase, signupUseCase, logoutUseCase, getCurrentUserUseCase)
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
 
         // When
         viewModel.signup(email, password)
@@ -123,7 +125,7 @@ class LoginViewModelTest {
         val user = User("uid123", "test@email.com", "Test User")
         every { getCurrentUserUseCase() } returns user
 
-        val viewModel = LoginViewModel(loginUseCase, signupUseCase, logoutUseCase, getCurrentUserUseCase)
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
 
         // When & Then
         assertEquals(true, viewModel.isUserAuthenticated())
@@ -134,9 +136,47 @@ class LoginViewModelTest {
         // Given
         every { getCurrentUserUseCase() } returns null
 
-        val viewModel = LoginViewModel(loginUseCase, signupUseCase, logoutUseCase, getCurrentUserUseCase)
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
 
         // When & Then
         assertEquals(false, viewModel.isUserAuthenticated())
+    }
+
+    @Test
+    fun `loginWithGoogle should update state to Success when usecase returns success`() = runTest {
+        // Given
+        val idToken = "google-id-token-123"
+        val user = User("uid_google", "google@email.com", "Google User")
+
+        coEvery { googleLoginUseCase(idToken) } returns Result.success(user)
+
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
+
+        // When
+        viewModel.loginWithGoogle(idToken)
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(AuthUiState.Success, viewModel.uiState.value)
+    }
+
+    @Test
+    fun `loginWithGoogle should update state to Error when usecase returns failure`() = runTest {
+        // Given
+        val idToken = "invalid-google-token"
+        val errorMessage = "Erro ao fazer login com Google"
+
+        coEvery { googleLoginUseCase(idToken) } returns Result.failure(Exception(errorMessage))
+
+        val viewModel = LoginViewModel(loginUseCase, signupUseCase, googleLoginUseCase, logoutUseCase, getCurrentUserUseCase)
+
+        // When
+        viewModel.loginWithGoogle(idToken)
+        advanceUntilIdle()
+
+        // Then
+        val state = viewModel.uiState.value
+        assert(state is AuthUiState.Error)
+        assertEquals(errorMessage, (state as AuthUiState.Error).message)
     }
 }
