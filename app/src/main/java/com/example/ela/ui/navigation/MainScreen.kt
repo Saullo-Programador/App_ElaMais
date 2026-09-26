@@ -24,6 +24,7 @@ import com.example.ela.ui.screens.cycle.CycleScreen
 import com.example.ela.ui.screens.home.HomeScreen
 import com.example.ela.ui.screens.preferences.PreferencesScreen
 import com.example.ela.ui.screens.reminder.ReminderScreen
+import com.example.ela.ui.screens.settings.CoupleSharingScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
 import com.example.ela.ui.screens.splash.SplashScreen
 import com.example.ela.viewmodel.HomeViewModel
@@ -157,9 +158,13 @@ fun MainScreen() {
                     },
                     onClickManegeCare = {
                         navController.navigate(Screen.ManageCare.route)
+                    },
+                    onClickCoupleSharing = {
+                        navController.navigate(Screen.CoupleSharing.route)
                     }
                 )
             }
+
 
             composable(Screen.Preferences.route) {
                 PreferencesScreen(
@@ -169,6 +174,12 @@ fun MainScreen() {
 
             composable(Screen.ManageCare.route) {
                 ManageCareScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.CoupleSharing.route) {
+                CoupleSharingScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

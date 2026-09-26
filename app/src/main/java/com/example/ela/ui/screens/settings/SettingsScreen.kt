@@ -30,7 +30,8 @@ import androidx.core.net.toUri
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onClickPreferences: () -> Unit,
-    onClickManegeCare: () -> Unit
+    onClickManegeCare: () -> Unit,
+    onClickCoupleSharing: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -66,6 +67,7 @@ fun SettingsScreen(
         },
         onClickPreferences = onClickPreferences,
         onClickManegeCare = onClickManegeCare,
+        onClickCoupleSharing = onClickCoupleSharing,
         openEmail = {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = "mailto:saullo.programador@gmail.com".toUri()
@@ -91,6 +93,7 @@ fun SettingsContent(
     onDismissDeleteConfirmation: () -> Unit = {},
     onClickPreferences: () -> Unit = {},
     onClickManegeCare: () -> Unit = {},
+    onClickCoupleSharing: () -> Unit = {},
     openEmail: () -> Unit = {}
 ) {
 
@@ -426,7 +429,15 @@ fun SettingsContent(
                     onClick = onClickManegeCare
                 )
 
+                SettingClickableItem(
+                    icon = Icons.Default.People,
+                    title = "Compartilhamento do Casal",
+                    description = "Configurações de compartilhamento entre o casal",
+                    onClick = onClickCoupleSharing
+                )
+
                 // Limpar dados
+
 
                 SettingClickableItem(
                     icon = Icons.Default.DeleteForever,

@@ -7,6 +7,7 @@ import com.example.ela.data.mapper.toDto
 import com.example.ela.data.mapper.toEntity
 import com.example.ela.data.remote.dto.ReminderDto
 import com.example.ela.domain.model.Reminder
+import com.example.ela.domain.repository.AuthRepository
 import com.example.ela.domain.repository.ReminderRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -15,10 +16,14 @@ import kotlinx.coroutines.tasks.await
 
 class ReminderRepositoryImpl (
     private val dao: ReminderDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val authRepository: AuthRepository
 ) : ReminderRepository {
 
-    private val collection = firestore.collection("reminders")
+    private fun getRemindersCollection() =
+        authRepository.getCurrentUser()?.uid?.let { uid ->
+            firestore.collection("users").document(uid).collection("reminders")
+        }
 
     override fun getReminder(): Flow<List<Reminder>> {
         return dao.getAll().map { list ->
@@ -32,9 +37,9 @@ class ReminderRepositoryImpl (
             id = generatedId
         )
         try {
-            collection.document(reminderWithId.id.toString())
-                .set(reminderWithId.toDto())
-                .await()
+            getRemindersCollection()?.document(reminderWithId.id.toString())
+                ?.set(reminderWithId.toDto())
+                ?.await()
         } catch (e: Exception) {
             Log.e(
                 "ReminderRepository",
@@ -47,9 +52,9 @@ class ReminderRepositoryImpl (
     override suspend fun deleteReminder(reminder: Reminder) {
         dao.delete(reminder.toEntity())
         try {
-            collection.document(reminder.id.toString())
-                .delete()
-                .await()
+            getRemindersCollection()?.document(reminder.id.toString())
+                ?.delete()
+                ?.await()
         } catch (e: Exception) {
             Log.e(
                 "ReminderRepository",
@@ -61,11 +66,11 @@ class ReminderRepositoryImpl (
 
     override suspend fun syncReminder() {
         try {
-            val snapshot = collection.get().await()
+            val snapshot = getRemindersCollection()?.get()?.await()
 
-            val list = snapshot.documents.mapNotNull {
+            val list = snapshot?.documents?.mapNotNull {
                 it.toObject(ReminderDto::class.java)
-            }
+            } ?: emptyList()
 
             list.forEach {
                 dao.insert(it.toDomain().toEntity())
@@ -82,9 +87,9 @@ class ReminderRepositoryImpl (
     override suspend fun deleteAll() {
         dao.deleteAll()
         try {
-            val snapshot = collection.get().await()
-            snapshot.documents.forEach { doc ->
-                collection.document(doc.id).delete().await()
+            val snapshot = getRemindersCollection()?.get()?.await()
+            snapshot?.documents?.forEach { doc ->
+                getRemindersCollection()?.document(doc.id)?.delete()?.await()
             }
         } catch (e: Exception) {
             Log.e("ReminderRepository", "Erro ao deletar todos os lembretes no Firebase", e)

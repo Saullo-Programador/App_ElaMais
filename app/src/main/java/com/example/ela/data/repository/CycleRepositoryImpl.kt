@@ -8,6 +8,7 @@ import com.example.ela.data.mapper.toEntity
 import com.example.ela.data.remote.dto.CycleDto
 import com.example.ela.domain.model.Cycle
 import com.example.ela.domain.repository.CycleRepository
+import com.example.ela.domain.repository.AuthRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,10 +16,14 @@ import kotlinx.coroutines.tasks.await
 
 class CycleRepositoryImpl (
     private val dao: CycleDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val authRepository: AuthRepository
 ): CycleRepository {
 
-    private val collection = firestore.collection("cycles")
+    private fun getCycleDocument() =
+        authRepository.getCurrentUser()?.uid?.let { uid ->
+            firestore.collection("cycles").document(uid)
+        }
 
     override fun getCycle(): Flow<Cycle?> {
         return dao.getCycle().map { entity ->
@@ -31,9 +36,7 @@ class CycleRepositoryImpl (
         dao.insertCycle(cycle.toEntity())
         // 🔹 Tenta enviar pro Firebase
         try {
-            collection.document("user_cycle")
-                .set(cycle.toDto())
-                .await()
+            getCycleDocument()?.set(cycle.toDto())?.await()
         } catch (e: Exception) {
             // Log removed to avoid unit test crash
         }
@@ -41,8 +44,8 @@ class CycleRepositoryImpl (
 
     override suspend fun syncCycle() {
         try {
-            val snapshot = collection.document("user_cycle").get().await()
-            val dto = snapshot.toObject(CycleDto::class.java)
+            val snapshot = getCycleDocument()?.get()?.await()
+            val dto = snapshot?.toObject(CycleDto::class.java)
 
             dto?.let {
                 dao.insertCycle(it.toDomain().toEntity())
@@ -55,10 +58,9 @@ class CycleRepositoryImpl (
     override suspend fun deleteAll() {
         dao.deleteAll()
         try {
-            collection.document("user_cycle").delete().await()
+            getCycleDocument()?.delete()?.await()
         } catch (e: Exception) {
             // Log removed to avoid unit test crash
         }
     }
-
 }

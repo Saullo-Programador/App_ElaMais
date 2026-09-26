@@ -7,6 +7,7 @@ import com.example.ela.data.mapper.toDto
 import com.example.ela.data.mapper.toEntity
 import com.example.ela.data.remote.dto.PreferencesDto
 import com.example.ela.domain.model.Preferences
+import com.example.ela.domain.repository.AuthRepository
 import com.example.ela.domain.repository.PreferencesRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -16,10 +17,14 @@ import kotlinx.coroutines.tasks.await
 
 class PreferencesRepositoryImpl(
     private val dao: PreferencesDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val authRepository: AuthRepository
 ) : PreferencesRepository {
 
-    private val collection = firestore.collection("preferences")
+    private fun getPreferencesDocument() =
+        authRepository.getCurrentUser()?.uid?.let { uid ->
+            firestore.collection("preferences").document(uid)
+        }
 
     override fun getPreferences(): Flow<Preferences?> {
         return dao.get().map { entity ->
@@ -31,9 +36,9 @@ class PreferencesRepositoryImpl(
         dao.save(preferences.toEntity())
 
         try {
-            collection.document("user_preferences")
-                .set(preferences.toDto())
-                .await()
+            getPreferencesDocument()
+                ?.set(preferences.toDto())
+                ?.await()
         } catch (e: Exception) {
             Log.e(
                 "PreferencesRepository",
@@ -45,8 +50,8 @@ class PreferencesRepositoryImpl(
 
     override suspend fun syncPreferences() {
         try {
-            val snapshot = collection.document("user_preferences").get().await()
-            val dto = snapshot.toObject(PreferencesDto::class.java)
+            val snapshot = getPreferencesDocument()?.get()?.await()
+            val dto = snapshot?.toObject(PreferencesDto::class.java)
 
             dto?.let {
                 dao.save(it.toDomain().toEntity())
@@ -69,7 +74,7 @@ class PreferencesRepositoryImpl(
     override suspend fun deleteAll() {
         dao.deleteAll()
         try {
-            collection.document("user_preferences").delete().await()
+            getPreferencesDocument()?.delete()?.await()
         } catch (e: Exception) {
             Log.e("PreferencesRepository", "Erro ao deletar preferências no Firebase", e)
         }

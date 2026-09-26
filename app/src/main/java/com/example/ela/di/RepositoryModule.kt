@@ -37,22 +37,25 @@ object RepositoryModule {
     @Provides
     fun provideCycleRepository(
         dao: CycleDao,
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        authRepository: AuthRepository
     ): CycleRepository {
-        return CycleRepositoryImpl(dao, firestore)
+        return CycleRepositoryImpl(dao, firestore, authRepository)
     }
 
     @Provides
     fun provideReminderRepository(
         dao: ReminderDao,
-        firestore: FirebaseFirestore
-    ): ReminderRepository = ReminderRepositoryImpl(dao, firestore)
+        firestore: FirebaseFirestore,
+        authRepository: AuthRepository
+    ): ReminderRepository = ReminderRepositoryImpl(dao, firestore, authRepository)
 
     @Provides
     fun providePreferencesRepository(
         dao: PreferencesDao,
-        firestore: FirebaseFirestore
-    ): PreferencesRepository = PreferencesRepositoryImpl(dao, firestore)
+        firestore: FirebaseFirestore,
+        authRepository: AuthRepository
+    ): PreferencesRepository = PreferencesRepositoryImpl(dao, firestore, authRepository)
 
     @Provides
     fun provideImportantDateRepository(
@@ -69,6 +72,7 @@ object RepositoryModule {
     @Provides
     fun provideCareActionRepository(
         dao: com.example.ela.data.local.dao.CareActionDao,
-        firestore: FirebaseFirestore
-    ): CareActionRepository = CareActionRepositoryImpl(dao, firestore)
+        firestore: FirebaseFirestore,
+        authRepository: AuthRepository
+    ): CareActionRepository = CareActionRepositoryImpl(dao, firestore, authRepository)
 }
