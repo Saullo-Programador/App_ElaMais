@@ -19,8 +19,9 @@ import com.example.ela.ui.screens.auth.LoginScreen
 import com.example.ela.ui.screens.auth.LoginViewModel
 import com.example.ela.ui.screens.auth.SignUpScreen
 import com.example.ela.ui.screens.care.CareScreen
-import com.example.ela.ui.screens.care.ManageCareScreen
+import com.example.ela.ui.screens.settings.ManageCareScreen
 import com.example.ela.ui.screens.cycle.CycleScreen
+import com.example.ela.ui.screens.cycleHistory.CycleHistoryScreen
 import com.example.ela.ui.screens.home.HomeScreen
 import com.example.ela.ui.screens.preferences.PreferencesScreen
 import com.example.ela.ui.screens.reminder.ReminderScreen
@@ -41,16 +42,16 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val isUserAuthenticated = authViewModel.isUserAuthenticated()
     val startDestination = Screen.Splash.route
 
 
-    val showBottomBar = currentRoute != Screen.Preferences.route &&
-                        currentRoute != Screen.ManageCare.route &&
-                        currentRoute != Screen.Splash.route &&
-                        currentRoute != Screen.Login.route &&
-                        currentRoute != Screen.Signup.route &&
-                        currentRoute != Screen.ForgotPassword.route
+    val showBottomBar = (currentRoute != Screen.Preferences.route) &&
+                        (currentRoute != Screen.ManageCare.route) &&
+                        (currentRoute != Screen.CycleHistory.route) &&
+                        (currentRoute != Screen.Splash.route) &&
+                        (currentRoute != Screen.Login.route) &&
+                        (currentRoute != Screen.Signup.route) &&
+                        (currentRoute != Screen.ForgotPassword.route)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -59,7 +60,7 @@ fun MainScreen() {
             if (showBottomBar) {
                 BottomBar(navController, currentPhase)
             }
-        }
+        },
     ) { padding ->
 
         NavHost(
@@ -82,10 +83,9 @@ fun MainScreen() {
                     onSignup = {
                         navController.navigate(Screen.Signup.route)
                     },
-                    onForgotPassword = {
-                        navController.navigate(Screen.ForgotPassword.route)
-                    }
-                )
+                ) {
+                    navController.navigate(Screen.ForgotPassword.route)
+                }
             }
             composable(Screen.Signup.route) {
                 SignUpScreen(
@@ -133,7 +133,7 @@ fun MainScreen() {
 
                 val phase = try {
                     CyclePhase.valueOf(phaseString ?: "")
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     CyclePhase.FOLLICULAR
                 }
 
@@ -156,8 +156,11 @@ fun MainScreen() {
                     onClickPreferences = {
                         navController.navigate(Screen.Preferences.route)
                     },
-                    onClickManegeCare = {
+                    onClickManageCare = {
                         navController.navigate(Screen.ManageCare.route)
+                    },
+                    onClickCycleHistory = {
+                        navController.navigate(Screen.CycleHistory.route)
                     },
                     onClickCoupleSharing = {
                         navController.navigate(Screen.CoupleSharing.route)
@@ -175,6 +178,12 @@ fun MainScreen() {
             composable(Screen.ManageCare.route) {
                 ManageCareScreen(
                     onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.CycleHistory.route) {
+                CycleHistoryScreen(
+                    onBack = {navController.popBackStack()}
                 )
             }
 

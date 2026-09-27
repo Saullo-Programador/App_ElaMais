@@ -30,8 +30,9 @@ import androidx.core.net.toUri
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onClickPreferences: () -> Unit,
-    onClickManegeCare: () -> Unit,
-    onClickCoupleSharing: () -> Unit
+    onClickManageCare: () -> Unit,
+    onClickCoupleSharing: () -> Unit,
+    onClickCycleHistory: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -66,7 +67,8 @@ fun SettingsScreen(
             viewModel.onDismissDeleteConfirmation()
         },
         onClickPreferences = onClickPreferences,
-        onClickManegeCare = onClickManegeCare,
+        onClickManageCare = onClickManageCare,
+        onClickCycleHistory = onClickCycleHistory,
         onClickCoupleSharing = onClickCoupleSharing,
         openEmail = {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -92,7 +94,8 @@ fun SettingsContent(
     onConfirmDeleteClick: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
     onClickPreferences: () -> Unit = {},
-    onClickManegeCare: () -> Unit = {},
+    onClickManageCare: () -> Unit = {},
+    onClickCycleHistory: () -> Unit = {},
     onClickCoupleSharing: () -> Unit = {},
     openEmail: () -> Unit = {}
 ) {
@@ -351,7 +354,6 @@ fun SettingsContent(
                     mutableStateOf(true)
                 }
 
-
                 SettingSwitchItem(
                     icon = Icons.Default.DarkMode,
                     title = "Tema escuro",
@@ -359,7 +361,6 @@ fun SettingsContent(
                     checked = uiState.preferences.isDarkMode,
                     onCheckedChange = onToggleDarkMode
                 )
-
 
                 SettingSwitchItem(
                     icon = Icons.AutoMirrored.Filled.VolumeUp,
@@ -371,7 +372,6 @@ fun SettingsContent(
                     }
                 )
 
-
                 SettingClickableItem(
                     icon = Icons.Default.Tune,
                     title = "Preferências",
@@ -379,7 +379,6 @@ fun SettingsContent(
                     onClick = onClickPreferences
                 )
             }
-
 
             Spacer(
                 modifier = Modifier.height(16.dp)
@@ -422,11 +421,20 @@ fun SettingsContent(
 //                    }
 //                )
 
+                // Manege Care
                 SettingClickableItem(
                     icon = Icons.Default.Favorite,
                     title = "Cuidados",
                     description = "Gerenciar os cuidados",
-                    onClick = onClickManegeCare
+                    onClick = onClickManageCare
+                )
+
+                // Histórico de Ciclos
+                SettingClickableItem(
+                    icon = Icons.Default.History,
+                    title = "Ciclos",
+                    description = "Gerenciar os ciclos",
+                    onClick = onClickCycleHistory
                 )
 
                 SettingClickableItem(
@@ -437,7 +445,6 @@ fun SettingsContent(
                 )
 
                 // Limpar dados
-
 
                 SettingClickableItem(
                     icon = Icons.Default.DeleteForever,

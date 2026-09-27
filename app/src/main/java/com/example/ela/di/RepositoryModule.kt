@@ -60,14 +60,16 @@ object RepositoryModule {
     @Provides
     fun provideImportantDateRepository(
         dao: ImportantDateDao,
-        firestore: FirebaseFirestore
-    ): ImportantDateRepository = ImportantDateRepositoryImpl(dao, firestore)
+        firestore: FirebaseFirestore,
+        authRepository: AuthRepository
+    ): ImportantDateRepository = ImportantDateRepositoryImpl(dao, firestore, authRepository)
 
     @Provides
     fun provideCycleRecordRepository(
         dao: CycleRecordDao,
-        firestore: FirebaseFirestore
-    ): CycleRecordRepository = CycleRecordRepositoryImpl(dao, firestore)
+        firestore: FirebaseFirestore,
+        authRepository: AuthRepository
+    ): CycleRecordRepository = CycleRecordRepositoryImpl(dao, firestore, authRepository)
 
     @Provides
     fun provideCareActionRepository(

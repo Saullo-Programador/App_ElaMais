@@ -21,9 +21,13 @@ class PreferencesRepositoryImpl(
     private val authRepository: AuthRepository
 ) : PreferencesRepository {
 
-    private fun getPreferencesDocument() =
+    private fun getPreferencesCollection() =
         authRepository.getCurrentUser()?.uid?.let { uid ->
-            firestore.collection("preferences").document(uid)
+            firestore
+                .collection("users")
+                .document(uid)
+                .collection("preferences")
+                .document("settings")
         }
 
     override fun getPreferences(): Flow<Preferences?> {
@@ -36,13 +40,13 @@ class PreferencesRepositoryImpl(
         dao.save(preferences.toEntity())
 
         try {
-            getPreferencesDocument()
+            getPreferencesCollection()
                 ?.set(preferences.toDto())
                 ?.await()
         } catch (e: Exception) {
             Log.e(
                 "PreferencesRepository",
-                "Erro ao sincronizar Preferências do Firebase",
+                "Erro ao salvar Preferências no Firebase",
                 e
             )
         }
@@ -50,7 +54,7 @@ class PreferencesRepositoryImpl(
 
     override suspend fun syncPreferences() {
         try {
-            val snapshot = getPreferencesDocument()?.get()?.await()
+            val snapshot = getPreferencesCollection()?.get()?.await()
             val dto = snapshot?.toObject(PreferencesDto::class.java)
 
             dto?.let {
@@ -66,7 +70,10 @@ class PreferencesRepositoryImpl(
     }
 
     override suspend fun updateDarkMode(isDarkMode: Boolean) {
-        val current = dao.get().first()?.toDomain() ?: Preferences()
+        val current = dao.get()
+            .first()
+            ?.toDomain()
+            ?: Preferences()
         val updated = current.copy(isDarkMode = isDarkMode)
         savePreferences(updated)
     }
@@ -74,7 +81,10 @@ class PreferencesRepositoryImpl(
     override suspend fun deleteAll() {
         dao.deleteAll()
         try {
-            getPreferencesDocument()?.delete()?.await()
+            getPreferencesCollection()
+                ?.delete()
+                ?.await()
+
         } catch (e: Exception) {
             Log.e("PreferencesRepository", "Erro ao deletar preferências no Firebase", e)
         }

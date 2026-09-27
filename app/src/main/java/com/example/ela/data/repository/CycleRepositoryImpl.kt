@@ -22,7 +22,11 @@ class CycleRepositoryImpl (
 
     private fun getCycleDocument() =
         authRepository.getCurrentUser()?.uid?.let { uid ->
-            firestore.collection("cycles").document(uid)
+            firestore
+                .collection("users")
+                .document(uid)
+                .collection("cycles")
+                .document("current")
         }
 
     override fun getCycle(): Flow<Cycle?> {
@@ -38,7 +42,13 @@ class CycleRepositoryImpl (
         try {
             getCycleDocument()?.set(cycle.toDto())?.await()
         } catch (e: Exception) {
-            // Log removed to avoid unit test crash
+            // Firebase indisponível.
+            // Os dados continuam salvos localmente.
+            Log.e(
+                "CycleRepository",
+                "Erro ao salvar o Cycle no Firebase",
+                e
+            )
         }
     }
 
@@ -51,7 +61,11 @@ class CycleRepositoryImpl (
                 dao.insertCycle(it.toDomain().toEntity())
             }
         } catch (e: Exception) {
-            // Log removed to avoid unit test crash
+            Log.e(
+                "CycleRepository",
+                "Erro ao sincronizar Cycle do Firebase",
+                e
+            )
         }
     }
 
@@ -60,7 +74,11 @@ class CycleRepositoryImpl (
         try {
             getCycleDocument()?.delete()?.await()
         } catch (e: Exception) {
-            // Log removed to avoid unit test crash
+            Log.e(
+                "CycleRepository",
+                "Erro ao deletar Cycle no Firebase",
+                e
+            )
         }
     }
 }

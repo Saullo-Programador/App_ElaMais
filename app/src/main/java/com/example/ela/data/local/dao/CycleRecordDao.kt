@@ -14,7 +14,7 @@ interface CycleRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: CycleRecordEntity)
 
-    @Query("SELECT * FROM cycle_records ORDER BY startDate ASC")
+    @Query("SELECT * FROM cycle_records ORDER BY startDate DESC")
     fun getAll(): Flow<List<CycleRecordEntity>>
 
     @Delete

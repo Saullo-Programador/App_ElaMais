@@ -2,12 +2,14 @@ package com.example.ela.ui.screens.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.ela.ui.theme.ElaTheme
 
@@ -22,8 +24,18 @@ fun CoupleSharingScreen(
                 CenterAlignedTopAppBar(
                     title = { Text("Compartilhamento do Casal", fontWeight = FontWeight.Bold) },
                     navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+                        IconButton(
+                            onClick = onBack,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                                contentDescription = "Voltar",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 )
@@ -97,6 +109,12 @@ fun CoupleSharingItem(
     )
 }
 
-
-// Removido SettingsSection duplicado
-
+@Preview(showBackground = true)
+@Composable
+fun CoupleSharingScreenPreview() {
+    ElaTheme {
+        CoupleSharingScreen(
+            onBack = {}
+        )
+    }
+}

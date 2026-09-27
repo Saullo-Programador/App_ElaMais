@@ -7,6 +7,7 @@ import com.example.ela.data.mapper.toDto
 import com.example.ela.data.mapper.toEntity
 import com.example.ela.data.remote.dto.ImportantDateDto
 import com.example.ela.domain.model.ImportantDate
+import com.example.ela.domain.repository.AuthRepository
 import com.example.ela.domain.repository.ImportantDateRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -15,10 +16,14 @@ import kotlinx.coroutines.tasks.await
 
 class ImportantDateRepositoryImpl(
     private val dao: ImportantDateDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val authRepository: AuthRepository
 ) : ImportantDateRepository {
 
-    private val collection = firestore.collection("important_dates")
+    private fun getImportantDatesCollection() =
+        authRepository.getCurrentUser()?.uid?.let { uid ->
+            firestore.collection("users").document(uid).collection("important_dates")
+        }
 
     override fun getDates(): Flow<List<ImportantDate>> {
         return dao.getAll().map { list ->
@@ -31,9 +36,9 @@ class ImportantDateRepositoryImpl(
         dao.insert(date.toEntity())
         // 🔹 Tenta enviar pro Firebase
         try {
-            collection.document(date.id.toString())
-                .set(date.toDto())
-                .await()
+            getImportantDatesCollection()?.document(date.id.toString())
+                ?.set(date.toDto())
+                ?.await()
         } catch (e: Exception) {
             Log.e(
                 "ImportantDateRepository",
@@ -48,9 +53,9 @@ class ImportantDateRepositoryImpl(
         dao.delete(date.toEntity())
         // 🔹 Tenta enviar pro Firebase
         try {
-            collection.document(date.id.toString())
-                .delete()
-                .await()
+            getImportantDatesCollection()?.document(date.id.toString())
+                ?.delete()
+                ?.await()
         } catch (e: Exception) {
             Log.e(
                 "ImportantDateRepository",
@@ -62,11 +67,11 @@ class ImportantDateRepositoryImpl(
 
     override suspend fun syncDates() {
         try {
-            val snapshot = collection.get().await()
+            val snapshot = getImportantDatesCollection()?.get()?.await()
 
-            val list = snapshot.documents.mapNotNull {
+            val list = snapshot?.documents?.mapNotNull {
                 it.toObject(ImportantDateDto::class.java)
-            }
+            } ?: emptyList()
 
             list.forEach {
                 dao.insert(it.toDomain().toEntity())
@@ -83,9 +88,9 @@ class ImportantDateRepositoryImpl(
     override suspend fun deleteAll() {
         dao.deleteAll()
         try {
-            val snapshot = collection.get().await()
-            snapshot.documents.forEach { doc ->
-                collection.document(doc.id).delete().await()
+            val snapshot = getImportantDatesCollection()?.get()?.await()
+            snapshot?.documents?.forEach { doc ->
+                getImportantDatesCollection()?.document(doc.id)?.delete()?.await()
             }
         } catch (e: Exception) {
             Log.e("ImportantDateRepository", "Erro ao deletar todas as datas importantes no Firebase", e)

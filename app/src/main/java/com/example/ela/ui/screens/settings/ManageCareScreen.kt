@@ -1,4 +1,4 @@
-package com.example.ela.ui.screens.care
+package com.example.ela.ui.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,10 +31,14 @@ import com.example.ela.ui.components.ButtonComponent
 import com.example.ela.ui.components.ErrorView
 import com.example.ela.ui.components.InputComponent
 import com.example.ela.ui.components.LoadingView
+import com.example.ela.ui.screens.care.CareActionUiState
+import com.example.ela.ui.screens.care.getPhaseColor
+import com.example.ela.ui.screens.care.getPhaseTitle
 import com.example.ela.ui.theme.*
 import com.example.ela.viewmodel.CareActionViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageCareScreen(
     viewModel: CareActionViewModel = hiltViewModel(),
@@ -65,9 +69,37 @@ fun ManageCareScreen(
 
     Scaffold(
         topBar = {
-            ManageCareTopBar(
-                onBack = onBack,
-                onDeleteAllClick = { showDeleteAllConfirm = true }
+            CenterAlignedTopAppBar(
+                title = { Text("Gerenciar Cuidados", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { showDeleteAllConfirm = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Deletar Todos",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -93,8 +125,6 @@ fun ManageCareScreen(
                     showEditor = true
                 },
                 actions = state.actions,
-                viewModel = viewModel,
-                onBack = onBack
             )
             if (showDeleteAllConfirm) {
                 AlertDialog(
@@ -138,64 +168,13 @@ fun ManageCareScreen(
     }
 }
 
-@Composable
-fun ManageCareTopBar(
-    onBack: () -> Unit,
-    onDeleteAllClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(
-                onClick = onBack,
-                colors = IconButtonDefaults.iconButtonColors(
-                    MaterialTheme.colorScheme.background
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "Gerenciar Cuidados",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-
-        IconButton(
-            onClick = onDeleteAllClick,
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = MaterialTheme.colorScheme.error
-            )
-        ) {
-            Icon(
-                Icons.Default.Delete,
-                contentDescription = "Deletar Todos",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
-}
-
+// ManageCareTopBar removed as it is now replaced by CenterAlignedTopAppBar in Scaffold
 @Composable
 fun ManageCareScreenContent(
     state: CareActionUiState,
     onDelete: (CareAction) -> Unit,
     onEdit: (CareAction) -> Unit,
     actions: List<CareAction>,
-    onBack: () -> Unit,
-    viewModel: CareActionViewModel
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         when {
@@ -205,7 +184,6 @@ fun ManageCareScreenContent(
                 actions = actions,
                 onDelete = onDelete,
                 onEdit = onEdit,
-                onBack = onBack
             )
         }
     }
@@ -216,7 +194,6 @@ fun ManageCareContent(
     actions: List<CareAction>,
     onDelete: (CareAction) -> Unit = {},
     onEdit: (CareAction) -> Unit = {},
-    onBack: () -> Unit = {}
 ){
     val phases = CyclePhase.entries
 
