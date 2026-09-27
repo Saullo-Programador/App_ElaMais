@@ -48,6 +48,7 @@ fun MainScreen() {
     val showBottomBar = (currentRoute != Screen.Preferences.route) &&
                         (currentRoute != Screen.ManageCare.route) &&
                         (currentRoute != Screen.CycleHistory.route) &&
+                        (currentRoute != Screen.CoupleSharing.route) &&
                         (currentRoute != Screen.Splash.route) &&
                         (currentRoute != Screen.Login.route) &&
                         (currentRoute != Screen.Signup.route) &&
@@ -66,7 +67,7 @@ fun MainScreen() {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
         ) {
             // 🚀 SPLASH
             composable(Screen.Splash.route) {

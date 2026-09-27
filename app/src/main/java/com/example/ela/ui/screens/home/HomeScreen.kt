@@ -18,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -90,13 +91,15 @@ fun HomeContent(
     val scrollState = rememberScrollState()
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding(),
         color = MaterialTheme.colorScheme.background
     ) {
         when {
             state.isLoading -> LoadingView()
             state.error != null -> ErrorView(state.error!!)
-            state.cycleInfo == null -> EmptyView()
+            state.cycleInfo == null || !state.cycleInfo.hasData -> EmptyView()
             else -> {
                 Column(
                     modifier = Modifier

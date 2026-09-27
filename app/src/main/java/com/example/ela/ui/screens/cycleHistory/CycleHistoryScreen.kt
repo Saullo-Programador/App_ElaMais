@@ -37,113 +37,111 @@ fun CycleHistoryScreen(
     var showAddRecordDialog by remember { mutableStateOf(false) }
     var recordToEdit by remember { mutableStateOf<CycleRecord?>(null) }
 
-    ElaTheme {
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = { Text("Histórico de Ciclos", fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBack,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = Color.Transparent
-                            )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Histórico de Ciclos", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { showDeleteAllConfirm = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteSweep,
+                            contentDescription = "Deletar Tudo",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            when {
+                state.isLoading -> {
+                    LoadingView()
+                }
+                state.history.isEmpty() -> {
+                    EmptyHistoryView { showAddRecordDialog = true }
+                }
+                else -> {
+                    CycleHistoryContent(
+                        history = state.history,
+                        onDeleteRecord = { record ->
+                            viewModel.deleteRecord(record)
+                        },
+                        onEditRecord = { record ->
+                            recordToEdit = record
+                        },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            if (showDeleteAllConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteAllConfirm = false },
+                    title = { Text("Deletar Todo Histórico") },
+                    text = { Text("Tem certeza que deseja apagar todos os seus registros de ciclo? Esta ação não pode ser desfeita.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteAllRecords()
+                                showDeleteAllConfirm = false
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                                contentDescription = "Voltar",
-                                tint = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Text("Deletar Tudo")
                         }
                     },
-                    actions = {
-                        IconButton(
-                            onClick = { showDeleteAllConfirm = true },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.DeleteSweep,
-                                contentDescription = "Deletar Tudo",
-                                modifier = Modifier.size(24.dp)
-                            )
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteAllConfirm = false }) {
+                            Text("Cancelar")
                         }
                     }
                 )
             }
-        ) { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                when {
-                    state.isLoading -> {
-                        LoadingView()
-                    }
-                    state.history.isEmpty() -> {
-                        EmptyHistoryView { showAddRecordDialog = true }
-                    }
-                    else -> {
-                        CycleHistoryContent(
-                            history = state.history,
-                            onDeleteRecord = { record ->
-                                viewModel.deleteRecord(record)
-                            },
-                            onEditRecord = { record ->
-                                recordToEdit = record
-                            },
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
 
-                if (showDeleteAllConfirm) {
-                    AlertDialog(
-                        onDismissRequest = { showDeleteAllConfirm = false },
-                        title = { Text("Deletar Todo Histórico") },
-                        text = { Text("Tem certeza que deseja apagar todos os seus registros de ciclo? Esta ação não pode ser desfeita.") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.deleteAllRecords()
-                                    showDeleteAllConfirm = false
-                                },
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                Text("Deletar Tudo")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDeleteAllConfirm = false }) {
-                                Text("Cancelar")
-                            }
-                        }
-                    )
-                }
+            if (showAddRecordDialog) {
+                AddCycleRecordDialog(
+                    onDismiss = { showAddRecordDialog = false },
+                    onSave = { start, end ->
+                        viewModel.saveRecord(start, end)
+                        showAddRecordDialog = false
+                    }
+                )
+            }
 
-                if (showAddRecordDialog) {
-                    AddCycleRecordDialog(
-                        onDismiss = { showAddRecordDialog = false },
-                        onSave = { start, end ->
-                            viewModel.saveRecord(start, end)
-                            showAddRecordDialog = false
-                        }
-                    )
-                }
-
-                if (recordToEdit != null) {
-                    EditCycleRecordBottomSheet(
-                        record = recordToEdit!!,
-                        onDismiss = { recordToEdit = null },
-                        onSave = { start, end ->
-                            viewModel.saveRecord(start, end, id = recordToEdit!!.id)
-                            recordToEdit = null
-                        }
-                    )
-                }
+            if (recordToEdit != null) {
+                EditCycleRecordBottomSheet(
+                    record = recordToEdit!!,
+                    onDismiss = { recordToEdit = null },
+                    onSave = { start, end ->
+                        viewModel.saveRecord(start, end, id = recordToEdit!!.id)
+                        recordToEdit = null
+                    }
+                )
             }
         }
     }

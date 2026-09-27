@@ -203,7 +203,6 @@ fun ManageCareContent(
                 .fillMaxSize()
                 .padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -246,7 +245,7 @@ fun CareDropdown(
             .fillMaxWidth()
             .clickable(onClick = {expanded = !expanded}),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(0.3f)),
+        colors = CardDefaults.cardColors(containerColor = phaseColor.copy(alpha = 0.1f)),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         )
@@ -257,7 +256,6 @@ fun CareDropdown(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(phaseColor.copy(alpha = 0.1f))
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
