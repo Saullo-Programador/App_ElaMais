@@ -5,7 +5,7 @@ import com.example.ela.data.local.dao.CareActionDao
 import com.example.ela.data.local.entity.CareActionEntity
 import com.example.ela.domain.model.CareAction
 import com.example.ela.domain.model.CyclePhase
-import com.google.firebase.firestore.CollectionReference
+import com.example.ela.domain.repository.AuthRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,21 +23,20 @@ class CareActionRepositoryImplTest {
 
     private lateinit var dao: CareActionDao
     private lateinit var repository: CareActionRepositoryImpl
+    private lateinit var authRepository: AuthRepository
     private lateinit var firebaseFirestore: FirebaseFirestore
-
 
     @Before
     fun setup() {
         dao = mockk()
         firebaseFirestore = mockk()
+        authRepository = mockk()
 
-        val collection = mockk<CollectionReference>()
+        // Sem usuário logado, o repositório pula a parte do Firebase.
+        // Estes testes validam só o comportamento local (DAO).
+        every { authRepository.getCurrentUser() } returns null
 
-        every {
-            firebaseFirestore.collection("care_actions")
-        } returns collection
-
-        repository = CareActionRepositoryImpl(dao, firebaseFirestore)
+        repository = CareActionRepositoryImpl(dao, firebaseFirestore, authRepository)
     }
 
     @Test

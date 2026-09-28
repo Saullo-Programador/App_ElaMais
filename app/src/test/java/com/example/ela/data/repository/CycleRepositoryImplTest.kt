@@ -5,6 +5,8 @@ import com.example.ela.data.local.dao.CycleDao
 import com.example.ela.data.local.entity.CycleEntity
 import com.example.ela.data.remote.dto.CycleDto
 import com.example.ela.domain.model.Cycle
+import com.example.ela.domain.model.User
+import com.example.ela.domain.repository.AuthRepository
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
@@ -14,6 +16,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -26,22 +29,41 @@ class CycleRepositoryImplTest {
     private lateinit var dao: CycleDao
     private lateinit var firebaseFirestore: FirebaseFirestore
     private lateinit var repository: CycleRepositoryImpl
+    private lateinit var authRepository: AuthRepository
+
+    private val testUid = "uid_teste"
 
     @Before
     fun setup() {
         dao = mockk()
         firebaseFirestore = mockk()
+        authRepository = mockk()
 
-        val collection = mockk<CollectionReference>()
-
-        every {
-            firebaseFirestore.collection("cycles")
-        } returns collection
+        every { authRepository.getCurrentUser() } returns User(uid = testUid)
 
         repository = CycleRepositoryImpl(
             dao,
-            firebaseFirestore
+            firebaseFirestore,
+            authRepository
         )
+    }
+
+    /**
+     * Monta o caminho real usado pelo repositório:
+     * users/{uid}/cycles/current
+     */
+    private fun mockCycleDocument(): DocumentReference {
+        val users = mockk<CollectionReference>()
+        val userDoc = mockk<DocumentReference>()
+        val cycles = mockk<CollectionReference>()
+        val cycleDoc = mockk<DocumentReference>()
+
+        every { firebaseFirestore.collection("users") } returns users
+        every { users.document(testUid) } returns userDoc
+        every { userDoc.collection("cycles") } returns cycles
+        every { cycles.document("current") } returns cycleDoc
+
+        return cycleDoc
     }
 
     @Test
@@ -100,16 +122,7 @@ class CycleRepositoryImplTest {
             lastPeriodStart = 1725148800000L
         )
 
-        val collection = mockk<CollectionReference>()
-        val document = mockk<DocumentReference>()
-
-        every {
-            firebaseFirestore.collection("cycles")
-        } returns collection
-
-        every {
-            collection.document("user_cycle")
-        } returns document
+        val document = mockCycleDocument()
 
         // Task real já concluído
         every {
@@ -120,15 +133,14 @@ class CycleRepositoryImplTest {
             dao.insertCycle(any())
         } returns Unit
 
-        repository = CycleRepositoryImpl(
-            dao,
-            firebaseFirestore
-        )
-
         repository.saveCycle(cycle)
 
         coVerify {
             dao.insertCycle(any())
+        }
+
+        verify {
+            document.set(any())
         }
     }
 
@@ -142,16 +154,7 @@ class CycleRepositoryImplTest {
             lastPeriodStart = 1725148800000L
         )
 
-        val collection = mockk<CollectionReference>()
-        val document = mockk<DocumentReference>()
-
-        every {
-            firebaseFirestore.collection("cycles")
-        } returns collection
-
-        every {
-            collection.document("user_cycle")
-        } returns document
+        val document = mockCycleDocument()
 
         every {
             document.set(any())
@@ -160,11 +163,6 @@ class CycleRepositoryImplTest {
         coEvery {
             dao.insertCycle(any())
         } returns Unit
-
-        repository = CycleRepositoryImpl(
-            dao,
-            firebaseFirestore
-        )
 
         repository.saveCycle(cycle)
 
@@ -183,37 +181,22 @@ class CycleRepositoryImplTest {
             lastPeriodStart = 1725148800000L
         )
 
-        val mockDocument = mockk<DocumentSnapshot>()
+        val mockSnapshot = mockk<DocumentSnapshot>()
 
         every {
-            mockDocument.toObject(CycleDto::class.java)
+            mockSnapshot.toObject(CycleDto::class.java)
         } returns mockDto
 
-        val documentReference = mockk<DocumentReference>()
-
-        val collection = mockk<CollectionReference>()
-
-        every {
-            firebaseFirestore.collection("cycles")
-        } returns collection
-
-        every {
-            collection.document("user_cycle")
-        } returns documentReference
+        val document = mockCycleDocument()
 
         // Task real concluído
         every {
-            documentReference.get()
-        } returns Tasks.forResult(mockDocument)
+            document.get()
+        } returns Tasks.forResult(mockSnapshot)
 
         coEvery {
             dao.insertCycle(any())
         } returns Unit
-
-        repository = CycleRepositoryImpl(
-            dao,
-            firebaseFirestore
-        )
 
         repository.syncCycle()
 
