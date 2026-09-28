@@ -66,16 +66,18 @@ fun CareScreenContent(
     onToggle: (CareAction) -> Unit,
     onSave: (CareAction) -> Unit
 ) {
-    Surface(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-        when {
-            state.isLoading -> LoadingView()
-            state.error != null -> ErrorView(state.error)
-            else -> CareContent(
-                phase = state.phase,
-                actions = state.actions,
-                onToggle = onToggle,
-                onSave = onSave
-            )
+    Scaffold { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            when {
+                state.isLoading -> LoadingView()
+                state.error != null -> ErrorView(state.error)
+                else -> CareContent(
+                    phase = state.phase,
+                    actions = state.actions,
+                    onToggle = onToggle,
+                    onSave = onSave
+                )
+            }
         }
     }
 }
@@ -162,9 +164,8 @@ fun CareContent(
 
             // Lista de ações
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 88.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(actions) { action ->

@@ -1,5 +1,8 @@
 package com.example.ela.ui.navigation
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -7,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -29,8 +31,8 @@ import com.example.ela.ui.screens.settings.CoupleSharingScreen
 import com.example.ela.ui.screens.settings.SettingsScreen
 import com.example.ela.ui.screens.splash.SplashScreen
 import com.example.ela.viewmodel.HomeViewModel
-import com.example.ela.ui.theme.ElaTheme
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
@@ -46,28 +48,31 @@ fun MainScreen() {
 
 
     val showBottomBar = (currentRoute != Screen.Preferences.route) &&
-                        (currentRoute != Screen.ManageCare.route) &&
-                        (currentRoute != Screen.CycleHistory.route) &&
-                        (currentRoute != Screen.CoupleSharing.route) &&
-                        (currentRoute != Screen.Splash.route) &&
-                        (currentRoute != Screen.Login.route) &&
-                        (currentRoute != Screen.Signup.route) &&
-                        (currentRoute != Screen.ForgotPassword.route)
+            (currentRoute != Screen.ManageCare.route) &&
+            (currentRoute != Screen.CycleHistory.route) &&
+            (currentRoute != Screen.CoupleSharing.route) &&
+            (currentRoute != Screen.Splash.route) &&
+            (currentRoute != Screen.Login.route) &&
+            (currentRoute != Screen.Signup.route) &&
+            (currentRoute != Screen.ForgotPassword.route)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0),
         modifier = Modifier,
         bottomBar = {
             if (showBottomBar) {
                 BottomBar(navController, currentPhase)
             }
         },
-    ) { padding ->
+    ) { innerPadding ->
 
         NavHost(
             navController = navController,
             startDestination = startDestination,
             modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
         ) {
             // 🚀 SPLASH
             composable(Screen.Splash.route) {
@@ -184,7 +189,7 @@ fun MainScreen() {
 
             composable(Screen.CycleHistory.route) {
                 CycleHistoryScreen(
-                    onBack = {navController.popBackStack()}
+                    onBack = { navController.popBackStack() }
                 )
             }
 
@@ -195,12 +200,4 @@ fun MainScreen() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen(){
-    ElaTheme(
-        content = { MainScreen() }
-    )
 }

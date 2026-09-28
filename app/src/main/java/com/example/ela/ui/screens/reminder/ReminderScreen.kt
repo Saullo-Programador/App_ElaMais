@@ -134,7 +134,6 @@ fun ReminderContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .statusBarsPadding()
                 .padding(16.dp)
         ) {
             Text(
@@ -219,6 +218,7 @@ fun RemindersList(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 88.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(events) { event ->

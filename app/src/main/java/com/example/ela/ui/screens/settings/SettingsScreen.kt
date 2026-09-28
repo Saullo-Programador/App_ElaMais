@@ -37,54 +37,87 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    SettingsContent(
-        uiState = uiState,
-        onClearAllData = {
-            viewModel.clearAllData()
-        },
-        onDismissSuccess = {
-            viewModel.dismissSuccessMessage()
-        },
-        onDismissError = {
-            viewModel.dismissErrorMessage()
-        },
-        onToggleNotifications = {
-            viewModel.toggleNotifications(it)
-        },
-        onUpdateTime = {
-            viewModel.updateNotificationTime(it)
-        },
-        onUpdateFrequency = {
-            viewModel.updateFrequency(it)
-        },
-        onToggleDarkMode = {
-            viewModel.toggleDarkMode(it)
-        },
-        onConfirmDeleteClick = {
-            viewModel.onConfirmDeleteDataClick()
-        },
-        onDismissDeleteConfirmation = {
-            viewModel.onDismissDeleteConfirmation()
-        },
-        onClickPreferences = onClickPreferences,
-        onClickManageCare = onClickManageCare,
-        onClickCycleHistory = onClickCycleHistory,
-        onClickCoupleSharing = onClickCoupleSharing,
-        openEmail = {
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = "mailto:saullo.programador@gmail.com".toUri()
-                putExtra(Intent.EXTRA_SUBJECT, "Sugestão ou Feedback - Ela+")
+    Scaffold(
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = "Configurações",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "Personalize sua experiência no Ela+",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
             }
-            context.startActivity(intent)
         }
-    )
+    ){ innerPadding ->
+        SettingsContent(
+            modifier = Modifier.padding(innerPadding),
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            onClearAllData = {
+                viewModel.clearAllData()
+            },
+            onDismissSuccess = {
+                viewModel.dismissSuccessMessage()
+            },
+            onDismissError = {
+                viewModel.dismissErrorMessage()
+            },
+            onToggleNotifications = {
+                viewModel.toggleNotifications(it)
+            },
+            onUpdateTime = {
+                viewModel.updateNotificationTime(it)
+            },
+            onUpdateFrequency = {
+                viewModel.updateFrequency(it)
+            },
+            onToggleDarkMode = {
+                viewModel.toggleDarkMode(it)
+            },
+            onConfirmDeleteClick = {
+                viewModel.onConfirmDeleteDataClick()
+            },
+            onDismissDeleteConfirmation = {
+                viewModel.onDismissDeleteConfirmation()
+            },
+            onClickPreferences = onClickPreferences,
+            onClickManageCare = onClickManageCare,
+            onClickCycleHistory = onClickCycleHistory,
+            onClickCoupleSharing = onClickCoupleSharing,
+            openEmail = {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = "mailto:saullo.programador@gmail.com".toUri()
+                    putExtra(Intent.EXTRA_SUBJECT, "Sugestão ou Feedback - Ela+")
+                }
+                context.startActivity(intent)
+            }
+        )
+    }
 }
 
 
 @Composable
 fun SettingsContent(
+    modifier: Modifier,
     uiState: SettingsUiState = SettingsUiState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onToggleNotifications: (Boolean) -> Unit,
     onUpdateTime: (String) -> Unit,
     onUpdateFrequency: (Boolean) -> Unit,
@@ -104,9 +137,7 @@ fun SettingsContent(
     val scrollState = rememberScrollState()
 
     // Controle do Snackbar
-    val snackbarHostState = remember {
-        SnackbarHostState()
-    }
+
 
     val scope = rememberCoroutineScope()
 
@@ -207,43 +238,14 @@ fun SettingsContent(
     /*
      * Box permite posicionar o Snackbar sobre a tela.
      */
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-    ) {
+
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
-
-            // ==========================================
-            // TÍTULO
-            // ==========================================
-
-            Text(
-                text = "Configurações",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
-            Text(
-                text = "Personalize sua experiência no Ela+",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
-
 
             // ==========================================
             // NOTIFICAÇÕES
@@ -553,30 +555,9 @@ fun SettingsContent(
                 Text("Sair da conta")
             }
 
-
-            // Espaço para o Snackbar não ficar colado no conteúdo
-
-            Spacer(
-                modifier = Modifier.height(80.dp)
-            )
         }
 
-
-        // ==========================================
-        // SNACKBAR
-        // ==========================================
-
-        SnackbarHost(
-
-            hostState = snackbarHostState,
-
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        )
     }
-}
-
 
 // ======================================================
 // SEÇÃO DE CONFIGURAÇÕES
@@ -878,7 +859,8 @@ fun SettingsScreenPreview() {
 
             onUpdateFrequency = {},
 
-            onToggleDarkMode = {}
+            onToggleDarkMode = {},
+            modifier = Modifier
         )
     }
 }

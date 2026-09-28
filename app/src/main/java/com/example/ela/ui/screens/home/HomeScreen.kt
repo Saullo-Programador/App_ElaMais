@@ -46,12 +46,36 @@ fun HomeScreen(
     var showCalendar by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    HomeContent(
-        state = state,
-        onGoToCare = onGoToCare,
-        onOpenCalendar = { showCalendar = true },
-        onPeriodStarted = { viewModel.onPeriodStarted() }
-    )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Ela+",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Seu companheiro de cuidado",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            HomeContent(
+                state = state,
+                onGoToCare = onGoToCare,
+                onOpenCalendar = { showCalendar = true },
+                onPeriodStarted = { viewModel.onPeriodStarted() }
+            )
+        }
+    }
 
     if (showCalendar) {
         ModalBottomSheet(
@@ -90,82 +114,74 @@ fun HomeContent(
 ) {
     val scrollState = rememberScrollState()
 
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        when {
-            state.isLoading -> LoadingView()
-            state.error != null -> ErrorView(state.error!!)
-            state.cycleInfo == null || !state.cycleInfo.hasData -> EmptyView()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(16.dp)
-                ) {
-                    HeaderSection()
+    when {
+        state.isLoading -> LoadingView()
+        state.error != null -> ErrorView(state.error!!)
+        state.cycleInfo == null || !state.cycleInfo.hasData -> EmptyView()
+        else -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                PhaseCardAnimated(
+                    info = state.cycleInfo,
+                    onPeriodStarted = onPeriodStarted
+                )
 
-                    PhaseCardAnimated(
-                        info = state.cycleInfo,
-                        onPeriodStarted = onPeriodStarted
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                // Botão para abrir calendário
+                ButtonComponent(
+                    onClick = onOpenCalendar,
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Ver calendário completo",
+                    textColor = Color.White,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = getPhaseColor(state.cycleInfo.currentPhase)
+                    ),
+                    icon = Icons.Default.CalendarMonth,
+                    iconColor = Color.White
+                )
 
-                    // Botão para abrir calendário
-                    ButtonComponent(
-                        onClick = onOpenCalendar,
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Ver calendário completo",
-                        textColor = Color.White,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = getPhaseColor(state.cycleInfo.currentPhase)
-                        ),
-                        icon = Icons.Default.CalendarMonth,
-                        iconColor = Color.White
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                DaysCounterCard(days = state.cycleInfo.daysUntilNextPeriod)
 
-                    DaysCounterCard(days = state.cycleInfo.daysUntilNextPeriod)
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                AlertsCard(info = state.cycleInfo)
 
-                    AlertsCard(info = state.cycleInfo)
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                SuggestionsCard(info = state.cycleInfo)
 
-                    SuggestionsCard(info = state.cycleInfo)
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                ButtonComponent(
+                    onClick = { onGoToCare(state.cycleInfo.currentPhase) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = getPhaseColor(state.cycleInfo.currentPhase)
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp
+                    ),
+                    text = "Ver cuidados recomendados ❤️",
+                    textColor = Color.White,
+                    icon = Icons.Default.Spa,
+                    iconColor = Color.White
+                )
 
-                    ButtonComponent(
-                        onClick = { onGoToCare(state.cycleInfo.currentPhase) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = getPhaseColor(state.cycleInfo.currentPhase)
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 4.dp
-                        ),
-                        text = "Ver cuidados recomendados ❤️",
-                        textColor = Color.White,
-                        icon = Icons.Default.Spa,
-                        iconColor = Color.White
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
+
 
 @Composable
 fun HeaderSection() {

@@ -1,6 +1,7 @@
 package com.example.ela.ui.screens.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -94,7 +96,7 @@ fun ManageCareScreen(
                         )
                     ) {
                         Icon(
-                            Icons.Default.Delete,
+                            Icons.Default.DeleteSweep,
                             contentDescription = "Deletar Todos",
                             modifier = Modifier.size(24.dp)
                         )
@@ -201,7 +203,7 @@ fun ManageCareContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 24.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
 
             LazyColumn(
@@ -246,16 +248,16 @@ fun CareDropdown(
             .clickable(onClick = {expanded = !expanded}),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = phaseColor.copy(alpha = 0.1f)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
     ){
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .background(phaseColor.copy(alpha = 0.1f))
+                .fillMaxWidth()
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(phaseColor.copy(alpha = 0.1f))
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -285,13 +287,16 @@ fun CareDropdown(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(phaseColor.copy(alpha = 0.1f))
                         .padding(
                             start = 16.dp,
                             end = 16.dp,
                             bottom = 16.dp,
                             top = 8.dp
                         ),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+
                 ) {
                     if (actions.isEmpty()) {
                         Text(
