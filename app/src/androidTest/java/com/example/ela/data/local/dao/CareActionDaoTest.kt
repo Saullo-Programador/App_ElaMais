@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,54 +36,95 @@ class CareActionDaoTest {
         db.close()
     }
 
+    private fun action(
+        id: Long = 0,
+        title: String = "Teste",
+        phase: CyclePhase = CyclePhase.MENSTRUAL,
+        isCompleted: Boolean = false
+    ) = CareActionEntity(
+        id = id,
+        title = title,
+        description = "Descrição",
+        phase = phase.name,
+        isCompleted = isCompleted
+    )
+
     @Test
     fun insertAndGetByPhase() = runBlocking {
-        val phase = CyclePhase.MENSTRUAL.name
-        val action = CareActionEntity(
-            title = "Teste",
-            description = "Desc",
-            phase = phase,
-            isCompleted = false
-        )
-        careActionDao.insert(action)
-        val loaded = careActionDao.getByPhase(phase).first()
+        careActionDao.insert(action(phase = CyclePhase.MENSTRUAL))
+        careActionDao.insert(action(title = "Outra fase", phase = CyclePhase.OVULATION))
 
-        assertEquals(1, loaded.size)
-        assertEquals("Teste", loaded[0].title)
+        val result = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
+
+        assertEquals(1, result.size)
+        assertEquals("Teste", result.first().title)
     }
 
     @Test
-    fun updateCareAction() = runBlocking {
-        val action = CareActionEntity(
-            id = 1,
-            title = "Teste",
-            description = "Desc",
-            phase = CyclePhase.MENSTRUAL.name,
-            isCompleted = false
+    fun insertAllDeveInserirVariasAcoesDeUmaVez() = runBlocking {
+        careActionDao.insertAll(
+            listOf(
+                action(id = 1, title = "A"),
+                action(id = 2, title = "B")
+            )
         )
-        careActionDao.insert(action)
 
-        val updated = action.copy(isCompleted = true)
-        careActionDao.update(updated)
+        val result = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
 
-        val loaded = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
-        assertEquals(true, loaded[0].isCompleted)
+        assertEquals(2, result.size)
     }
 
     @Test
-    fun deleteCareAction() = runBlocking {
-        val action = CareActionEntity(
-            title = "Teste",
-            description = "Desc",
-            phase = CyclePhase.MENSTRUAL.name,
-            isCompleted = false
-        )
-        val id = careActionDao.insert(action)
-        val entityToDelete = action.copy(id = id)
+    fun updateDeveAlterarOsCamposDaAcaoExistente() = runBlocking {
+        careActionDao.insert(action(id = 1, title = "Original"))
 
-        careActionDao.delete(entityToDelete)
-        val loaded = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
+        val linhasAfetadas = careActionDao.update(action(id = 1, title = "Atualizado", isCompleted = true))
 
-        assertEquals(0, loaded.size)
+        val result = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
+        assertEquals(1, linhasAfetadas)
+        assertEquals("Atualizado", result.first().title)
+        assertTrue(result.first().isCompleted)
+    }
+
+    @Test
+    fun updateDeAcaoInexistenteNaoDeveAlterarNada() = runBlocking {
+        val linhasAfetadas = careActionDao.update(action(id = 99))
+
+        assertEquals(0, linhasAfetadas)
+    }
+
+    @Test
+    fun resetAllCompletionsDeveDesmarcarTodasAsAcoesConcluidas() = runBlocking {
+        careActionDao.insert(action(id = 1, isCompleted = true))
+        careActionDao.insert(action(id = 2, isCompleted = true))
+
+        careActionDao.resetAllCompletions()
+
+        val result = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
+        assertTrue(result.all { !it.isCompleted })
+    }
+
+    @Test
+    fun deleteByIdDeveRemoverApenasAAcaoInformada() = runBlocking {
+        careActionDao.insert(action(id = 1, title = "Fica"))
+        careActionDao.insert(action(id = 2, title = "Sai"))
+
+        val linhasAfetadas = careActionDao.deleteById(2)
+
+        val result = careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first()
+        assertEquals(1, linhasAfetadas)
+        assertEquals(1, result.size)
+        assertEquals("Fica", result.first().title)
+    }
+
+    @Test
+    fun deleteAllDeveLimparTodasAsAcoes() = runBlocking {
+        careActionDao.insert(action(id = 1, phase = CyclePhase.MENSTRUAL))
+        careActionDao.insert(action(id = 2, phase = CyclePhase.OVULATION))
+
+        careActionDao.deleteAll()
+
+        assertTrue(careActionDao.getByPhase(CyclePhase.MENSTRUAL.name).first().isEmpty())
+        assertTrue(careActionDao.getByPhase(CyclePhase.OVULATION.name).first().isEmpty())
     }
 }

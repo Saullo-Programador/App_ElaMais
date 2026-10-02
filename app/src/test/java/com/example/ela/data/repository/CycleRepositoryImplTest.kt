@@ -1,15 +1,15 @@
 package com.example.ela.data.repository
 
-import app.cash.turbine.test
 import com.example.ela.data.local.dao.CycleDao
 import com.example.ela.data.local.entity.CycleEntity
+import com.example.ela.data.mapper.toDomain
+import com.example.ela.data.mapper.toDto
+import com.example.ela.data.mapper.toEntity
 import com.example.ela.data.remote.dto.CycleDto
 import com.example.ela.domain.model.Cycle
 import com.example.ela.domain.model.User
 import com.example.ela.domain.repository.AuthRepository
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.coEvery
@@ -17,198 +17,195 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class CycleRepositoryImplTest {
 
     private lateinit var dao: CycleDao
-    private lateinit var firebaseFirestore: FirebaseFirestore
-    private lateinit var repository: CycleRepositoryImpl
+    private lateinit var firestore: FirebaseFirestore
     private lateinit var authRepository: AuthRepository
+    private lateinit var remote: FirestoreUserCollectionMock
+    private lateinit var repository: CycleRepositoryImpl
 
-    private val testUid = "uid_teste"
+    private val cycle = Cycle(id = 1, cycleLength = 28, periodLength = 5, lastPeriodStart = 1_725_148_800_000L)
 
     @Before
     fun setup() {
         dao = mockk()
-        firebaseFirestore = mockk()
+        firestore = mockk()
         authRepository = mockk()
 
-        every { authRepository.getCurrentUser() } returns User(uid = testUid)
+        every { authRepository.getCurrentUser() } returns User(uid = "uid-1")
+        remote = FirestoreUserCollectionMock(firestore, "uid-1", "cycles")
 
-        repository = CycleRepositoryImpl(
-            dao,
-            firebaseFirestore,
-            authRepository
-        )
+        repository = CycleRepositoryImpl(dao, firestore, authRepository)
     }
 
-    /**
-     * Monta o caminho real usado pelo repositório:
-     * users/{uid}/cycles/current
-     */
-    private fun mockCycleDocument(): DocumentReference {
-        val users = mockk<CollectionReference>()
-        val userDoc = mockk<DocumentReference>()
-        val cycles = mockk<CollectionReference>()
-        val cycleDoc = mockk<DocumentReference>()
-
-        every { firebaseFirestore.collection("users") } returns users
-        every { users.document(testUid) } returns userDoc
-        every { userDoc.collection("cycles") } returns cycles
-        every { cycles.document("current") } returns cycleDoc
-
-        return cycleDoc
+    private fun givenNoLoggedUser() {
+        every { authRepository.getCurrentUser() } returns null
     }
+
+    // ------------------------------------------------------------------
+    // getCycle
+    // ------------------------------------------------------------------
 
     @Test
     fun `deve mapear cycle entity para domain`() = runTest {
+        val entity = CycleEntity(id = 10, cycleLength = 30, periodLength = 6, lastPeriodStart = 1_000L)
+        every { dao.getCycle() } returns flowOf(entity)
 
-        val entity = CycleEntity(
-            id = 1,
-            cycleLength = 28,
-            periodLength = 5,
-            lastPeriodStart = 1725148800000L
-        )
+        val result = repository.getCycle().first()
 
-        every {
-            dao.getCycle()
-        } returns flowOf(entity)
-
-        repository.getCycle().test {
-
-            val result = awaitItem()
-
-            assertNotNull(result)
-
-            assertEquals(entity.id, result.id)
-            assertEquals(entity.cycleLength, result.cycleLength)
-            assertEquals(entity.periodLength, result.periodLength)
-            assertEquals(entity.lastPeriodStart, result.lastPeriodStart)
-
-            cancelAndIgnoreRemainingEvents()
-        }
+        assertEquals(entity.toDomain(), result)
     }
 
     @Test
     fun `deve retornar null quando nao existir ciclo`() = runTest {
+        every { dao.getCycle() } returns flowOf(null)
 
-        every {
-            dao.getCycle()
-        } returns flowOf(null)
-
-        repository.getCycle().test {
-
-            val result = awaitItem()
-
-            assertEquals(null, result)
-
-            cancelAndIgnoreRemainingEvents()
-        }
+        assertNull(repository.getCycle().first())
     }
+
+    // ------------------------------------------------------------------
+    // saveCycle
+    // ------------------------------------------------------------------
 
     @Test
     fun `deve salvar ciclo localmente e tentar salvar no firebase`() = runTest {
-
-        val cycle = Cycle(
-            id = 1,
-            cycleLength = 28,
-            periodLength = 5,
-            lastPeriodStart = 1725148800000L
-        )
-
-        val document = mockCycleDocument()
-
-        // Task real já concluído
-        every {
-            document.set(any())
-        } returns Tasks.forResult(null)
-
-        coEvery {
-            dao.insertCycle(any())
-        } returns Unit
+        val document = remote.document("current")
+        coEvery { dao.insertCycle(any()) } returns Unit
+        every { document.set(any()) } returns Tasks.forResult(null)
 
         repository.saveCycle(cycle)
 
-        coVerify {
-            dao.insertCycle(any())
-        }
-
-        verify {
-            document.set(any())
-        }
+        coVerify { dao.insertCycle(cycle.toEntity()) }
+        verify { document.set(cycle.toDto()) }
     }
 
     @Test
     fun `deve salvar localmente mesmo se firebase falhar`() = runTest {
-
-        val cycle = Cycle(
-            id = 1,
-            cycleLength = 28,
-            periodLength = 5,
-            lastPeriodStart = 1725148800000L
-        )
-
-        val document = mockCycleDocument()
-
-        every {
-            document.set(any())
-        } throws RuntimeException("Firebase Error")
-
-        coEvery {
-            dao.insertCycle(any())
-        } returns Unit
+        val document = remote.document("current")
+        coEvery { dao.insertCycle(any()) } returns Unit
+        every { document.set(any()) } throws RuntimeException("Firebase Error")
 
         repository.saveCycle(cycle)
 
-        coVerify {
-            dao.insertCycle(any())
-        }
+        coVerify { dao.insertCycle(any()) }
     }
 
     @Test
+    fun `saveCycle sem usuario logado nao deve tocar no firebase`() = runTest {
+        givenNoLoggedUser()
+        coEvery { dao.insertCycle(any()) } returns Unit
+
+        repository.saveCycle(cycle)
+
+        coVerify { dao.insertCycle(cycle.toEntity()) }
+        verify(exactly = 0) { firestore.collection(any()) }
+    }
+
+    // ------------------------------------------------------------------
+    // syncCycle
+    // ------------------------------------------------------------------
+
+    @Test
     fun `deve sincronizar ciclo do firebase para o banco local`() = runTest {
+        val dto = CycleDto(id = 1, cycleLength = 30, periodLength = 6, lastPeriodStart = 1_725_148_800_000L)
+        val snapshot = mockk<DocumentSnapshot>()
+        every { snapshot.toObject(CycleDto::class.java) } returns dto
 
-        val mockDto = CycleDto(
-            id = 1,
-            cycleLength = 30,
-            periodLength = 6,
-            lastPeriodStart = 1725148800000L
-        )
-
-        val mockSnapshot = mockk<DocumentSnapshot>()
-
-        every {
-            mockSnapshot.toObject(CycleDto::class.java)
-        } returns mockDto
-
-        val document = mockCycleDocument()
-
-        // Task real concluído
-        every {
-            document.get()
-        } returns Tasks.forResult(mockSnapshot)
-
-        coEvery {
-            dao.insertCycle(any())
-        } returns Unit
+        val document = remote.document("current")
+        every { document.get() } returns Tasks.forResult(snapshot)
+        coEvery { dao.insertCycle(any()) } returns Unit
 
         repository.syncCycle()
 
         coVerify {
             dao.insertCycle(
                 match {
-                    it.id.toInt() == 1 &&
-                            it.cycleLength == 30 &&
-                            it.periodLength == 6 &&
-                            it.lastPeriodStart == 1725148800000L
+                    it.id == 1L && it.cycleLength == 30 && it.periodLength == 6 &&
+                            it.lastPeriodStart == 1_725_148_800_000L
                 }
             )
         }
+    }
+
+    @Test
+    fun `sync nao deve salvar nada quando o documento nao existe`() = runTest {
+        val snapshot = mockk<DocumentSnapshot>()
+        every { snapshot.toObject(CycleDto::class.java) } returns null
+
+        val docMock = mockk<com.google.firebase.firestore.DocumentReference>(relaxed = true)
+        every { remote.collection.document(any()) } returns docMock
+        every { docMock.get() } returns Tasks.forResult(snapshot)
+
+        repository.syncCycle()
+
+        coVerify(exactly = 0) { dao.insertCycle(any()) }
+    }
+
+    @Test
+    fun `sync nao deve quebrar quando o firebase falha`() = runTest {
+        val docMock = mockk<com.google.firebase.firestore.DocumentReference>(relaxed = true)
+        every { remote.collection.document(any()) } returns docMock
+        every { docMock.get() } returns failedTaskGeneric<DocumentSnapshot>()
+
+        repository.syncCycle()
+
+        coVerify(exactly = 0) { dao.insertCycle(any()) }
+    }
+
+    @Test
+    fun `sync sem usuario logado nao deve gravar nada`() = runTest {
+        givenNoLoggedUser()
+
+        repository.syncCycle()
+
+        coVerify(exactly = 0) { dao.insertCycle(any()) }
+    }
+
+    // ------------------------------------------------------------------
+    // deleteAll
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `deleteAll deve limpar o banco local e o documento no firebase`() = runTest {
+        coEvery { dao.deleteAll() } returns Unit
+        val document = remote.document("current")
+        every { document.delete() } returns Tasks.forResult(null)
+
+        repository.deleteAll()
+
+        coVerify(exactly = 1) { dao.deleteAll() }
+        verify(exactly = 1) { document.delete() }
+    }
+
+    @Test
+    fun `deleteAll deve limpar o banco local mesmo se o firebase falhar`() = runTest {
+        coEvery { dao.deleteAll() } returns Unit
+        val docMock = mockk<com.google.firebase.firestore.DocumentReference>(relaxed = true)
+        every { remote.collection.document(any()) } returns docMock
+        every { docMock.delete() } returns failedTask()
+
+        repository.deleteAll()
+
+        coVerify(exactly = 1) { dao.deleteAll() }
+    }
+
+    @Test
+    fun `deleteAll sem usuario logado limpa apenas o banco local`() = runTest {
+        givenNoLoggedUser()
+        coEvery { dao.deleteAll() } returns Unit
+
+        repository.deleteAll()
+
+        coVerify(exactly = 1) { dao.deleteAll() }
+        verify(exactly = 0) { firestore.collection(any()) }
     }
 }
