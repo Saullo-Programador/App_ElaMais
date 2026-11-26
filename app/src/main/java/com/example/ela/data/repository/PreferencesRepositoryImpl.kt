@@ -1,6 +1,7 @@
 package com.example.ela.data.repository
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import com.example.ela.data.local.dao.PreferencesDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -44,7 +45,7 @@ class PreferencesRepositoryImpl(
                 ?.set(preferences.toDto())
                 ?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "PreferencesRepository",
                 "Erro ao salvar Preferências no Firebase",
                 e
@@ -61,7 +62,7 @@ class PreferencesRepositoryImpl(
                 dao.save(it.toDomain().toEntity())
             }
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "PreferencesRepository",
                 "Erro ao sincronizar Preferências do Firebase",
                 e
@@ -86,7 +87,7 @@ class PreferencesRepositoryImpl(
                 ?.await()
 
         } catch (e: Exception) {
-            Log.e("PreferencesRepository", "Erro ao deletar preferências no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("PreferencesRepository", "Erro ao deletar preferências no Firebase", e)
         }
     }
 

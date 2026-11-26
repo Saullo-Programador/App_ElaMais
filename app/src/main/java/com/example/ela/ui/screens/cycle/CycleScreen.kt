@@ -1,6 +1,7 @@
 package com.example.ela.ui.screens.cycle
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -177,7 +178,7 @@ fun CycleContent(
                         }
                     }catch (e: Exception){
                         //Data inválida, mantém o texto digitado
-                        Log.e("ERRO_DATA", "Data inválida, mantém o texto digitado: $e")
+                        if (BuildConfig.DEBUG) Log.e("ERRO_DATA", "Data inválida, mantém o texto digitado: $e")
                     }
                 }
             },

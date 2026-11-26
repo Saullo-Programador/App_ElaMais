@@ -26,7 +26,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -49,14 +49,19 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("com.google.guava:guava:33.4.0-android")
     }
 }
 
 dependencies {
 
-    implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.compose.remote.creation.core)
-    implementation(libs.google.accompanist.systemuicontroller)
 
 
     //Icons
@@ -68,6 +73,11 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // SQLCipher (criptografia Room)
+    implementation(libs.sqlcipher)
+
+    // EncryptedSharedPreferences / segurança
+    implementation(libs.androidx.security.crypto)
     // Firebase (Versões gerenciadas pelo BOM)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)

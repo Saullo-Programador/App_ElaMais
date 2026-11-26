@@ -1,6 +1,7 @@
 package com.example.ela.data.repository
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import com.example.ela.data.local.dao.CycleDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -44,7 +45,7 @@ class CycleRepositoryImpl (
         } catch (e: Exception) {
             // Firebase indisponível.
             // Os dados continuam salvos localmente.
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "CycleRepository",
                 "Erro ao salvar o Cycle no Firebase",
                 e
@@ -61,7 +62,7 @@ class CycleRepositoryImpl (
                 dao.insertCycle(it.toDomain().toEntity())
             }
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "CycleRepository",
                 "Erro ao sincronizar Cycle do Firebase",
                 e
@@ -74,7 +75,7 @@ class CycleRepositoryImpl (
         try {
             getCycleDocument()?.delete()?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "CycleRepository",
                 "Erro ao deletar Cycle no Firebase",
                 e

@@ -1,6 +1,7 @@
 package com.example.ela.data.repository
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import com.example.ela.data.local.dao.ImportantDateDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -40,7 +41,7 @@ class ImportantDateRepositoryImpl(
                 ?.set(date.toDto())
                 ?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "ImportantDateRepository",
                 "Erro ao sincronizar Data Importantes do Firebase",
                 e
@@ -57,7 +58,7 @@ class ImportantDateRepositoryImpl(
                 ?.delete()
                 ?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "ImportantDateRepository",
                 "Erro ao sincronizar Data Importantes do Firebase",
                 e
@@ -77,7 +78,7 @@ class ImportantDateRepositoryImpl(
                 dao.insert(it.toDomain().toEntity())
             }
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "ImportantDateRepository",
                 "Erro ao sincronizar Data Importantes do Firebase",
                 e
@@ -93,7 +94,7 @@ class ImportantDateRepositoryImpl(
                 getImportantDatesCollection()?.document(doc.id)?.delete()?.await()
             }
         } catch (e: Exception) {
-            Log.e("ImportantDateRepository", "Erro ao deletar todas as datas importantes no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("ImportantDateRepository", "Erro ao deletar todas as datas importantes no Firebase", e)
         }
     }
 }

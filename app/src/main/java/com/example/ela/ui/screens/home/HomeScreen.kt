@@ -127,6 +127,20 @@ fun HomeContent(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
+                Text(
+                    text = "Olá! 👋",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Seu ciclo hoje",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 PhaseCardAnimated(
                     info = state.cycleInfo,
                     onPeriodStarted = onPeriodStarted
@@ -150,6 +164,54 @@ fun HomeContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 DaysCounterCard(days = state.cycleInfo.daysUntilNextPeriod)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Callout: próxima menstruação
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("📅", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Próxima menstruação em ${state.cycleInfo.daysUntilNextPeriod} dias",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Callout: dica de hoje
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("💡", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Dica de hoje: beba água e descanse.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -569,17 +631,15 @@ fun HomeContentPreview() {
                 isLoading = false,
                 cycleInfo = CycleInfo(
                     currentPhase = CyclePhase.MENSTRUAL,
-                    daysUntilNextPeriod = 0,
-                    daysRemainingInPhase = 0,
-                    daysUntilFertileWindow = 0,
-                    daysUntilPms = 0,
+                    daysUntilNextPeriod = 25,
+                    daysRemainingInPhase = 3,
+                    daysUntilFertileWindow = 10,
+                    daysUntilPms = 15,
                     isFertileWindow = false,
                     isPms = false,
-                    suggestions = emptyList(),
-                    hasData = false
-                ),
-
-
+                    suggestions = listOf("Beba bastante água", "Faça exercícios leves"),
+                    hasData = true
+                )
             ),
             onGoToCare = {},
             onOpenCalendar = {},
@@ -599,18 +659,16 @@ fun HomeContentPreviewDark() {
                 isLoading = false,
                 cycleInfo = CycleInfo(
                     currentPhase = CyclePhase.MENSTRUAL,
-                    daysUntilNextPeriod = 0,
-                    daysRemainingInPhase = 0,
-                    daysUntilFertileWindow = 0,
-                    daysUntilPms = 0,
+                    daysUntilNextPeriod = 25,
+                    daysRemainingInPhase = 3,
+                    daysUntilFertileWindow = 10,
+                    daysUntilPms = 15,
                     isFertileWindow = false,
                     isPms = false,
-                    suggestions = emptyList(),
-                    hasData = false
-                ),
-
-
-                ),
+                    suggestions = listOf("Beba bastante água", "Faça exercícios leves"),
+                    hasData = true
+                )
+            ),
             onGoToCare = {},
             onOpenCalendar = {},
             onPeriodStarted = {}

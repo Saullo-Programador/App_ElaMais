@@ -1,6 +1,7 @@
 package com.example.ela.data.repository
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import com.example.ela.data.local.dao.CycleRecordDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -57,7 +58,7 @@ class CycleRecordRepositoryImpl(
                 ?.set(record.toDto())
                 ?.await()
         } catch (e: Exception){
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "CycleRecordRepository",
                 "Erro ao salvar histórico no Firebase",
                 e
@@ -78,7 +79,7 @@ class CycleRecordRepositoryImpl(
                 ?.delete()
                 ?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "CycleRecordRepository",
                 "Erro ao deletar histórico no Firebase",
                 e
@@ -101,7 +102,7 @@ class CycleRecordRepositoryImpl(
                 document.reference.delete().await()
             }
         } catch (e: Exception){
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "CycleRecordRepository",
                 "Erro ao deletar histórico no Firebase",
                 e

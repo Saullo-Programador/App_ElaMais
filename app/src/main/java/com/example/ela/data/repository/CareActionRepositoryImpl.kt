@@ -1,6 +1,7 @@
 package com.example.ela.data.repository
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import com.example.ela.data.local.dao.CareActionDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toEntity
@@ -102,7 +103,7 @@ class CareActionRepositoryImpl(
                 ?.set(action.toDto())
                 ?.await()
         } catch (e: Exception) {
-            Log.e("CareActionRepository", "Erro ao atualizar cuidado no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("CareActionRepository", "Erro ao atualizar cuidado no Firebase", e)
         }
     }
 
@@ -115,7 +116,7 @@ class CareActionRepositoryImpl(
                 ?.set(action.toDto())
                 ?.await()
         } catch (e: Exception) {
-            Log.e("CareActionRepository", "Erro ao salvar cuidado no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("CareActionRepository", "Erro ao salvar cuidado no Firebase", e)
         }
     }
 
@@ -128,7 +129,7 @@ class CareActionRepositoryImpl(
                 ?.delete()
                 ?.await()
         } catch (e: Exception) {
-            Log.e("CareActionRepository", "Erro ao deletar cuidado no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("CareActionRepository", "Erro ao deletar cuidado no Firebase", e)
         }
     }
 
@@ -142,7 +143,7 @@ class CareActionRepositoryImpl(
                 getCareActionsCollection()?.document(doc.id)?.delete()?.await()
             }
         } catch (e: Exception) {
-            Log.e("CareActionRepository", "Erro ao deletar todos os cuidados no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("CareActionRepository", "Erro ao deletar todos os cuidados no Firebase", e)
         }
     }
 
@@ -161,7 +162,7 @@ class CareActionRepositoryImpl(
                 dao.insert(dto.toDomain().toEntity())
             }
         } catch (e: Exception) {
-            Log.e("CareActionRepository", "Erro ao sincronizar cuidados do Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("CareActionRepository", "Erro ao sincronizar cuidados do Firebase", e)
         }
     }
 }

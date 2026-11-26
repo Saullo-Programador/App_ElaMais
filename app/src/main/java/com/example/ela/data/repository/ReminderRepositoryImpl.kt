@@ -1,6 +1,7 @@
 package com.example.ela.data.repository
 
 import android.util.Log
+import com.example.ela.BuildConfig
 import com.example.ela.data.local.dao.ReminderDao
 import com.example.ela.data.mapper.toDomain
 import com.example.ela.data.mapper.toDto
@@ -41,7 +42,7 @@ class ReminderRepositoryImpl (
                 ?.set(reminderWithId.toDto())
                 ?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "ReminderRepository",
                 "Erro ao sincronizar Lembrete com Firebase",
                 e
@@ -56,7 +57,7 @@ class ReminderRepositoryImpl (
                 ?.delete()
                 ?.await()
         } catch (e: Exception) {
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "ReminderRepository",
                 "Erro ao sincronizar Lembrete com Firebase",
                 e
@@ -76,7 +77,7 @@ class ReminderRepositoryImpl (
                 dao.insert(it.toDomain().toEntity())
             }
         }catch (e: Exception){
-            Log.e(
+            if (BuildConfig.DEBUG) Log.e(
                 "ReminderRepository",
                 "Erro ao sincronizar Lembrete com Firebase",
                 e
@@ -92,7 +93,7 @@ class ReminderRepositoryImpl (
                 getRemindersCollection()?.document(doc.id)?.delete()?.await()
             }
         } catch (e: Exception) {
-            Log.e("ReminderRepository", "Erro ao deletar todos os lembretes no Firebase", e)
+            if (BuildConfig.DEBUG) Log.e("ReminderRepository", "Erro ao deletar todos os lembretes no Firebase", e)
         }
     }
 }

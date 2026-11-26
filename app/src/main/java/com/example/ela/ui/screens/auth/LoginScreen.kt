@@ -104,7 +104,7 @@ fun LoginScreenContent(
             if (idToken != null) {
                 onGoogleLogin(idToken)
             } else {
-                println("Erro ao obter token do Google")
+                // TODO: exibir erro ao usuário em vez de logar
             }
         }
     }
